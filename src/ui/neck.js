@@ -31,7 +31,7 @@ export function render(root, ctx) {
   };
   drawMode();
   draw();
-  root.append(h('div.stack-lg', h('div.stack', h('h1', 'The neck'), h('p.muted', 'Nut at the top, low E on the left, like a chord book. Scroll down the page to go up the neck.')), modeHolder, body));
+  root.append(h('div.stack-lg', h('div.stack', h('h1', 'The neck'), h('p.muted', 'Held like you hold the guitar: nut on the left, high e on top (same as tab). Swipe sideways to go up the neck.')), modeHolder, body));
 }
 
 // Triads built on the scale's degrees (pentatonics borrow from their parent scale).
@@ -90,7 +90,7 @@ function scales(body) {
     if (!inBox(n)) kind = 'dim';
     return { s: n.s, f: n.f, kind, label: ui.labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats) };
   });
-  const board = neck({ from: 0, to: 17, dots, fh: 34, label: `${ui.key} ${sc.name}, whole neck`, onTap: (s, f) => A.pluck(fretMidi(s, f), A.now(), { vel: 0.7 }) });
+  const board = neck({ from: 0, to: 17, dots, label: `${ui.key} ${sc.name}, whole neck`, focus: box ? Math.max(0, Math.min(...box.map((n) => n.f)) - 1) : 0, onTap: (s, f) => A.pluck(fretMidi(s, f), A.now(), { vel: 0.7 }) });
   const posOpts = [{ value: -1, label: 'All' }, ...Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) }))];
   const span = box ? `frets ${Math.min(...box.map((n) => n.f))}–${Math.max(...box.map((n) => n.f))}` : 'every note, frets 0–17';
   body.append(

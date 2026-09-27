@@ -60,7 +60,7 @@ export function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) 
   const kindOf = (n) => (n.degree === '1' ? 'root' : n.degree === '3' || n.degree === 'b3' ? 'third' : n.degree === '5' ? 'fifth' : n.degree === 'b5' ? 'blue' : 'scale');
   const labelOf = (n, i) => (labels === 'order' ? i + 1 : labels === 'finger' ? fingers.get(n.s + ':' + n.f) || 'o' : labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats));
   const draw = () => {
-    board = neck({ from: from === 0 ? 0 : from, to, dots: asc.map((n, i) => ({ s: n.s, f: n.f, kind: kindOf(n), label: labelOf(n, i) })), label: `${key} ${SCALES[scaleId].name} position ${position + 1}`, fh: 40 });
+    board = neck({ from: from === 0 ? 0 : from, to, dots: asc.map((n, i) => ({ s: n.s, f: n.f, kind: kindOf(n), label: labelOf(n, i) })), label: `${key} ${SCALES[scaleId].name} position ${position + 1}`, focus: from });
     wrap.replaceChildren(board);
     show();
   };

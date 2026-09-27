@@ -219,6 +219,27 @@ test('pick lab: fingerstyle pieces play with the string lit', { skip }, async ()
   await ctx.close();
 });
 
+test('neck: runs sideways like a guitar and scrolls to the chosen position', { skip }, async () => {
+  const { page, ctx, errors } = await open();
+  await page.click('#tab-neck');
+  const dims = await page.evaluate(() => {
+    const svg = document.querySelector('.nk-wrap svg');
+    const vb = svg.viewBox.baseVal;
+    const wrap = svg.closest('.nk-wrap');
+    return { vbW: vb.width, vbH: vb.height, scrollW: wrap.scrollWidth, clientW: wrap.clientWidth };
+  });
+  assert.ok(dims.vbW > dims.vbH * 3, 'the neck is drawn horizontally');
+  assert.ok(dims.scrollW > dims.clientW, 'the whole neck scrolls sideways');
+  await noHorizontalScroll(page, 'neck');
+  await page.click('#sc-pos button:has-text("3")');
+  await page.waitForTimeout(200);
+  const left = await page.evaluate(() => document.querySelector('.nk-wrap').scrollLeft);
+  assert.ok(left > 100, 'scrolled along to position 3 (' + left + ')');
+  await page.screenshot({ path: join(SHOTS, 'neck-horizontal.png') });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
 test('neck: tapping a C shape names it C', { skip }, async () => {
   const { page, ctx, errors } = await open();
   await page.click('#tab-neck');

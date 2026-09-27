@@ -195,10 +195,10 @@ input[type="range"] { width: 100%; accent-color: var(--red); }
 .trk.slowest .trk-name { font-weight: 700; color: var(--red); }
 .trk .mono { font-size: .76rem; color: var(--ink-2); text-align: right; }
 
-/* The neck, in pencil */
-.nk-wrap { display: flex; justify-content: center; }
+/* The neck, in pencil. Horizontal like the guitar in your hands; long necks swipe sideways. */
+.nk-wrap { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding-bottom: 6px; }
 .nk { display: block; height: auto; overflow: visible; }
-.nk-long { width: 100%; max-width: 330px; }
+.nk-h.fit { width: 100%; max-width: 460px; margin: 0 auto; }
 .nk-box { width: 100%; max-width: 240px; }
 .nk-wash { fill: var(--wash); }
 .nk-fret path { stroke: var(--pencil); stroke-width: 1.4; fill: none; stroke-linecap: round; }
@@ -208,6 +208,7 @@ input[type="range"] { width: 100%; accent-color: var(--red); }
 .nk-string.on path { stroke: var(--red); }
 .nk-inlay { fill: none; stroke: var(--pencil); stroke-width: 1.2; }
 .nk-num, .nk-sname { font: 700 14px var(--hand); fill: var(--ink-3); }
+.nk-sname.picking { fill: var(--red); font-size: 18px; }
 .nk-mute { stroke: var(--ink-2); stroke-width: 1.8; fill: none; stroke-linecap: round; }
 .nk-dot .fill { stroke: none; }
 .nk-dot .line { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; }

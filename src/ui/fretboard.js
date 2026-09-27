@@ -86,8 +86,8 @@ export function degreeKind(midi, rootPc, quality = '') {
   return 'ext';
 }
 
-// dots: [{s, f, label, kind: root|third|fifth|ext|scale|blue|dim|ghost}]
-export function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretboard', fh = 38, pickRow = false, box = false, stringNames = true } = {}) {
+// Vertical drawing, used only for chord boxes (the chord-book convention).
+function vneck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretboard', fh = 38, pickRow = false, box = false, stringNames = true } = {}) {
   const base = from === 0 ? 0 : from - 1;
   const frets = to - base;
   const top = OPEN;
@@ -183,6 +183,141 @@ export function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 
   return root;
 }
 
+// ---------------------------------------------------------------------------
+// The neck as you hold it: horizontal, nut on the left, high e on top (same rows as the tab).
+// Long necks scroll sideways inside their container; the view follows the note being played.
+const HS = 30; // string spacing
+const FW = 58; // fret width
+const NAMEW = 26; // string names / finger letters
+const OPENW = 30; // open-string column left of the nut
+const TOPPAD = 18;
+
+// dots: [{s, f, label, kind: root|third|fifth|ext|scale|blue|dim|ghost}]
+export function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretboard', pickRow = false, focus } = {}) {
+  const base = from === 0 ? 0 : from - 1;
+  const frets = to - base;
+  const nutX = NAMEW + OPENW;
+  const width = nutX + frets * FW + 14;
+  const boardH = HS * 5;
+  const height = TOPPAD + boardH + 34;
+  const y = (s) => TOPPAD + (5 - s) * HS;
+  const xWire = (k) => nutX + (k - base) * FW;
+  const xCenter = (f) => (f === 0 ? nutX - OPENW / 2 : xWire(f) - FW / 2);
+  const root = svg('svg', { viewBox: `0 0 ${width} ${height}`, class: 'nk nk-h' + (width <= 440 ? ' fit' : ''), role: 'img', 'aria-label': label });
+  if (width > 440) root.setAttribute('width', String(Math.round(width * 1.02)));
+  else root.style.maxWidth = Math.round(width * 1.12) + 'px'; // short windows stay close to real size
+  const by0 = y(5) - 9;
+  const by1 = y(0) + 9;
+  const wr = rng(seedOf(from, to, 3));
+  const j = () => (wr() - 0.5) * 2;
+  root.append(svg('path', { d: `M${nutX},${f1(by0 + j())} L${f1(xWire(to) + j())},${f1(by0 + j())} L${f1(xWire(to) + j())},${f1(by1 + j())} L${nutX},${f1(by1 + j())} Z`, class: 'nk-wash' }));
+  const midY = (y(2) + y(3)) / 2;
+  for (let f = Math.max(1, from); f <= to; f++) {
+    const cx = xCenter(f);
+    const inl = (cy) => svg('path', { d: blobPath(cx, cy, 3.4, seedOf(cx, cy)), class: 'nk-inlay' });
+    if (f % 12 === 0) root.append(inl((y(1) + y(2)) / 2), inl((y(3) + y(4)) / 2));
+    else if (INLAYS.includes(f)) root.append(inl(midY));
+  }
+  for (let k = base; k <= to; k++) {
+    if (k === 0) {
+      root.append(pencil(xWire(0) - 1.5, by0 - 2, xWire(0) - 1.5, by1 + 2, 'nk-nut', { width: 3.6, amp: 0.7 }));
+      root.append(pencil(xWire(0) + 2.5, by0 - 1, xWire(0) + 2.5, by1 + 1, 'nk-nut', { width: 1.4, amp: 0.7, second: false }));
+    } else root.append(pencil(xWire(k), by0, xWire(k), by1, 'nk-fret', { amp: 0.8 }));
+  }
+  for (let s = 0; s < 6; s++) {
+    const g = pencil(nutX - OPENW + 6, y(s), xWire(to) + 2, y(s), 'nk-string', { width: 0.9 + (5 - s) * 0.24, amp: 1.1 });
+    g.dataset.s = s;
+    root.append(g);
+  }
+  // string names on the left (they turn into the picking finger while playing)
+  const names = svg('g');
+  ['E', 'A', 'D', 'G', 'B', 'e'].forEach((n, s) => names.append(svg('text', { x: NAMEW / 2, y: y(s) + 5, 'text-anchor': 'middle', class: 'nk-sname', 'data-s': s }, n)));
+  root.append(names);
+  for (let f = Math.max(1, from); f <= to; f++)
+    if (f === from || INLAYS.includes(f) || f % 12 === 0 || f === 1) root.append(svg('text', { x: xCenter(f), y: by1 + 22, 'text-anchor': 'middle', class: 'nk-num' }, String(f)));
+  for (const s of muted) root.append(svg('path', { d: crossPath(nutX - OPENW / 2, y(s), 4.5, seedOf(s, 77)), class: 'nk-mute' }));
+  const hl = svg('g', { class: 'nk-hl' });
+  root.append(hl);
+  const dotLayer = svg('g');
+  for (const d of dots) {
+    if ((d.f < from && d.f !== 0) || d.f > to) continue;
+    const cx = xCenter(d.f);
+    const cy = y(d.s);
+    const seed = seedOf(d.s, d.f, cx);
+    const g = svg('g', { class: `nk-dot k-${d.kind || 'scale'}${d.f === 0 ? ' open' : ''}`, 'data-s': d.s, 'data-f': d.f });
+    const r = d.f === 0 ? 8 : 12.5;
+    if (d.f !== 0) g.append(svg('path', { d: blobPath(cx + 0.6, cy + 0.5, r - 0.4, seed + 3), class: 'fill' }));
+    g.append(svg('path', { d: blobPath(cx, cy, r, seed, { open: true }), class: 'line' }));
+    if (d.label != null && d.label !== '' && d.f !== 0) g.append(svg('text', { x: cx, y: cy + 5, 'text-anchor': 'middle' }, String(d.label)));
+    dotLayer.append(g);
+  }
+  root.append(dotLayer);
+  const rings = svg('g', { class: 'nk-rings' });
+  root.append(rings);
+  if (onTap) {
+    const taps = svg('g');
+    for (let s = 0; s < 6; s++)
+      for (let f = from === 0 ? 0 : from; f <= to; f++) {
+        const r = svg('rect', { x: f === 0 ? nutX - OPENW : xWire(f) - FW, y: y(s) - HS / 2, width: f === 0 ? OPENW : FW, height: HS, class: 'nk-tap' });
+        r.addEventListener('click', () => onTap(s, f));
+        taps.append(r);
+      }
+    root.append(taps);
+  }
+  // Keep a fret in view inside the scrolling container.
+  const scroller = () => root.closest('.nk-wrap');
+  root.scrollToFret = (f, { smooth = false, margin = 0.3 } = {}) => {
+    const sc = scroller();
+    if (!sc || sc.scrollWidth <= sc.clientWidth) return;
+    const scale = root.getBoundingClientRect().width / width;
+    const px = xCenter(f) * scale;
+    const left = sc.scrollLeft;
+    const w = sc.clientWidth;
+    if (px < left + w * 0.15 || px > left + w * 0.85) sc.scrollTo({ left: Math.max(0, px - w * margin), behavior: smooth ? 'smooth' : 'auto' });
+  };
+  if (focus != null) {
+    let tries = 0;
+    const go = () => (root.isConnected ? root.scrollToFret(focus, { margin: 0.12 }) : tries++ < 10 && requestAnimationFrame(go));
+    requestAnimationFrame(go);
+  }
+  root.highlight = (notes) => {
+    hl.replaceChildren();
+    rings.replaceChildren();
+    root.querySelectorAll('.nk-string.on').forEach((l) => l.classList.remove('on'));
+    names.querySelectorAll('text').forEach((t) => {
+      t.classList.remove('picking');
+      t.textContent = ['E', 'A', 'D', 'G', 'B', 'e'][t.dataset.s];
+    });
+    let follow = null;
+    for (const n of notes || []) {
+      if (n.s == null || n.s < 0) continue;
+      const cx = xCenter(n.f);
+      const cy = y(n.s);
+      const visible = !(n.f < from && n.f !== 0) && n.f <= to;
+      if (n.next) {
+        if (visible) rings.append(svg('path', { d: blobPath(cx, cy, 15, seedOf(cx, cy, 5), { open: true }), class: 'nk-next' }));
+        continue;
+      }
+      root.querySelector(`.nk-string[data-s="${n.s}"]`)?.classList.add('on');
+      if (visible) {
+        hl.append(svg('path', { d: blobPath(cx, cy, 16, seedOf(cx, cy, 1)), class: 'nk-hl-blob' }));
+        rings.append(svg('path', { d: blobPath(cx, cy, 15, seedOf(cx, cy, 2), { open: true }), class: 'nk-ring' }));
+        if (follow == null || n.f > follow) follow = n.f;
+      }
+      if (pickRow && n.label) {
+        const t = names.querySelector(`text[data-s="${n.s}"]`);
+        if (t) {
+          t.textContent = n.label;
+          t.classList.add('picking');
+          hl.append(svg('path', { d: blobPath(NAMEW / 2, cy, 11, seedOf(n.s, 9)), class: 'nk-hl-blob' }));
+        }
+      }
+    }
+    if (follow != null) root.scrollToFret(follow, { smooth: true, margin: 0.35 });
+  };
+  return root;
+}
+
 function windowFor(frets) {
   const fretted = frets.filter((f) => f > 0);
   const max = fretted.length ? Math.max(...fretted) : 0;
@@ -215,14 +350,14 @@ function boxDots(shape, sym, labels) {
 export function chordBox(shape, { sym, labels = 'finger', label } = {}) {
   const { from, to } = windowFor(shape.frets);
   const { dots, muted } = boxDots(shape, sym, labels);
-  return neck({ from, to, dots, muted, label: label || `${sym || shape.sym} chord`, fh: 40, box: true });
+  return vneck({ from, to, dots, muted, label: label || `${sym || shape.sym} chord`, fh: 40, box: true });
 }
 
 // Chord box with a pick row underneath, for "pick this, then this".
 export function pickBox(shape, { sym } = {}) {
   const { from, to } = windowFor(shape.frets);
   const { dots, muted } = boxDots(shape, sym, 'finger');
-  return neck({ from, to, dots, muted, label: `${sym || shape.sym}: pick the lit string`, fh: 40, box: true, pickRow: true });
+  return neck({ from, to: Math.max(to, from === 0 ? 5 : to), dots, muted, label: `${sym || shape.sym}: pick the lit string`, pickRow: true });
 }
 
 // Tab, typed like a tab sheet on pencil lines. columns: [{notes:[{s,f,tech}], mark}]
