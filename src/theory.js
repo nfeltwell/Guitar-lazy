@@ -340,7 +340,7 @@ export function transposeSym(sym, semis, preferFlats = false) {
 
 export const INTERVALS = [
   { semis: 1, name: 'minor 2nd', hint: 'Jaws' },
-  { semis: 2, name: 'major 2nd', hint: 'Happy Birthday (first two notes)' },
+  { semis: 2, name: 'major 2nd', hint: 'Happy Birthday (hap-py BIRTH)' },
   { semis: 3, name: 'minor 3rd', hint: 'Smoke on the Water (first two)' },
   { semis: 4, name: 'major 3rd', hint: 'Kumbaya' },
   { semis: 5, name: 'perfect 4th', hint: 'Here Comes the Bride' },

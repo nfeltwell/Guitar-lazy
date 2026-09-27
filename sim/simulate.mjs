@@ -284,11 +284,3 @@ if (process.argv.includes('--debug')) {
   const r = runOne(1000, 'lazy', {});
   for (const [id, st] of Object.entries(r.state.items)) if (!st.skipped) console.log(id, st.reps, st.bpm, st.clean.join('/'), st.ivl, st.hist.map((h) => h[1]).join(''));
 }
-if (process.argv.includes('--m1')) {
-  for (const seed of [1000, 8919, 16838]) {
-    const r = runOne(seed, 'lazy', {}, 180);
-    const st = r.state;
-    console.log(MILESTONES.slice(0, 2).map((m) => m.items.map((id) => { const s = st.items[id]; return id + ':' + (s ? (isLocked(s) ? 'L' : s.reps + '/' + s.bpm + '/' + s.clean.length) : '-'); }).join(' ')).join('\n'));
-    console.log('log days', Object.keys(st.log).length, 'ear mins', Object.values(st.log).reduce((a, e) => a + (e.ear || 0), 0));
-  }
-}

@@ -100,7 +100,9 @@ export function forecast(state, today, idx = currentMilestoneIdx(state), paceOve
   const guitarDays = guitarLeft <= 0.01 ? 0 : guitarPace > 0 ? guitarLeft / guitarPace : Infinity;
   const ear = tracks.find((t) => t.id === 'ear');
   const days = Math.max(guitarDays, ear.days);
-  const slowest = [...tracks].sort((a, b) => b.days - a.days)[0];
+  // Guitar tracks share one pool of time, so the slowest is either ear or the guitar track furthest behind.
+  const guitarSlowest = tracks.filter((t) => guitarTracks.includes(t.id)).sort((a, b) => b.minutes / Math.max(0.01, b.pace) - a.minutes / Math.max(0.01, a.pace))[0];
+  const slowest = ear.days > guitarDays ? ear : guitarSlowest;
   return { idx, milestone: MILESTONES[idx], left, tracks, guitarDays, days, slowest, totalMinutes: Object.values(left).reduce((a, b) => a + b, 0) };
 }
 

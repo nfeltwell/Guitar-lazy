@@ -1,11 +1,12 @@
 {
-  "name": "guitar-lazy",
+  "name": "lazy-guitar",
   "private": true,
   "type": "module",
+  "description": "A lazy speed-run guitar practice app: spaced repetition for playable items, honest countdowns, fingerpicking-first.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test test/",
+    "check": "node scripts/check-content.mjs",
     "sim": "node sim/simulate.mjs",
-    "check": "node scripts/check-content.mjs"
+    "test": "node scripts/build.mjs && node scripts/check-content.mjs && node --test test/*.test.mjs"
   }
 }

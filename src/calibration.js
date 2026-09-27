@@ -2,18 +2,18 @@
 export const CAL = {
   "repsToLock": {
     "pick": 18.1,
-    "strum": 12.7,
+    "strum": 12.6,
     "barre": 17.7,
-    "scale": 16.6,
-    "notes": 15,
-    "lick": 14.6,
-    "melody": 15,
-    "prog": 12.2,
-    "write": 16.4,
-    "ear": 18.3
+    "scale": 16.3,
+    "notes": 14.7,
+    "lick": 14.5,
+    "melody": 14.6,
+    "prog": 12.4,
+    "write": 16.1,
+    "ear": 18.1
   },
   "overhead": 1.42,
-  "fudge": 2.49,
+  "fudge": 2.23,
   "generated": "2026-09-27",
   "forecastMedianRatio": 1
 };
