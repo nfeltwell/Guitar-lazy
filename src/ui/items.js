@@ -1,14 +1,14 @@
 // The practice card: one playable item, played now, then rated.
-import { h, btn, icon, seg, toast } from './dom.js';
-import { fretboard, shapeWindow, tab, strumRow, noteLabel } from './fretboard.js';
-import { mascot } from './mascot.js';
+import { h, btn, icon, seg, toast, setBtn } from './dom.js';
+import { neck, chordBox, pickBox, tab, strumRow, noteLabel, legend, degreeKind } from './fretboard.js';
+import { moveBySpec, moveColumns, moveShapes, plainChange, MOVE_TYPES } from '../moves.js';
 import * as A from '../audio.js';
 import { CHEATS, PICKS, STRUMS, LICKS, MELODIES, PROGRESSIONS, TRACKS, shapeFor, barreShape, progressionChords, romanChord, SPARKLE } from '../content.js';
-import { pc, noteName, usesFlats, scalePosition, SCALES, INTERVALS, CHORDS, capoFor, transposeSym, fretMidi, TUNING } from '../theory.js';
+import { pc, noteName, usesFlats, scalePosition, SCALES, INTERVALS, CHORDS, capoFor, transposeSym, fretMidi, TUNING, parseChord, prettyChord } from '../theory.js';
 import { hasTempo, isLocked, ratingFromScore } from '../srs.js';
 import { explainHarmony, getSample, aiErrorText } from '../ai.js';
 
-const FINGER = { B: 'p', A: 'p', '3': 'i', '2': 'm', '1': 'a' };
+const FINGER = { B: 'p', A: 'p', F: 'p', '3': 'i', '2': 'm', '1': 'a' };
 
 function shuffle(a) {
   const b = a.slice();
@@ -19,6 +19,78 @@ function shuffle(a) {
   return b;
 }
 const rand = (a) => a[Math.floor(Math.random() * a.length)];
+
+// Scale degree label -> note colour.
+export function scaleKind(degree) {
+  if (degree === '1') return 'root';
+  if (degree === '3' || degree === 'b3') return 'third';
+  if (degree === '5') return 'fifth';
+  if (degree === 'b5') return 'blue';
+  return 'scale';
+}
+
+export function scaleDegreeKind(midi, keyPc, scaleId) {
+  const iv = (((midi - keyPc) % 12) + 12) % 12;
+  const steps = SCALES[scaleId]?.steps || [];
+  if (iv === 0) return 'root';
+  if ((iv === 3 || iv === 4) && steps.includes(iv)) return 'third';
+  if (iv === 7) return 'fifth';
+  if (iv === 6 && scaleId === 'blues') return 'blue';
+  return 'scale';
+}
+
+// Picking steps -> tab columns (a thumb slap shows as x on the top strings).
+export function pickColumns(steps) {
+  return steps.map((s) => ({
+    notes: s.notes.flatMap((n) => (n.mute ? [3, 4, 5].map((st) => ({ s: st, f: 'x' })) : [{ s: n.s, f: n.f }])),
+    mark: s.slot % 2 === 0 ? String(s.slot / 2 + 1) : '&',
+  }));
+}
+
+// A move: the chord chain, why it works, tab, chord boxes, play and compare.
+export function moveView(mv, { getBpm = () => 76, plain = null, onPlayState, open = false } = {}) {
+  const chain = h('div.move-chain', mv.chords.map((c, i) => [i ? h('span.arrow', '→') : null, h('span', { class: i > 0 && i < mv.chords.length - 1 ? 'via' : '' }, prettyChord(c))]));
+  const shapes = moveShapes(mv);
+  const grid = h('div.shape-grid', shapes.map((sh) => h('div.shape-cell', { 'data-key': sh.sym + sh.frets }, h('div.nm', h('span', prettyChord(sh.label || sh.sym))), chordBox(sh, { sym: sh.sym }))));
+  const t = tab(moveColumns(mv), { beatEvery: 8, label: mv.name + ' tab' });
+  let mode = null;
+  const onCol = (i, evs) => {
+    t.playhead(i);
+    const e = evs.find((x) => x.shape);
+    if (e) grid.querySelectorAll('.shape-cell').forEach((c) => c.classList.toggle('on', c.dataset.key === e.shape.sym + e.shape.frets));
+  };
+  const reset = () => {
+    mode = null;
+    playB.classList.remove('on');
+    plainB?.classList.remove('on');
+    setBtn(playB, 'Play the move', 'play');
+    t.playhead(-1);
+    onPlayState && onPlayState(false);
+  };
+  const start = (which) => {
+    A.stopAll();
+    if (mode === which) return reset();
+    reset();
+    mode = which;
+    (which === 'move' ? playB : plainB).classList.add('on');
+    if (which === 'move') setBtn(playB, 'Stop', 'stop');
+    A.playMove(which === 'move' ? mv : plain, getBpm(), { onCol: which === 'move' ? onCol : (i) => t.playhead(-1) });
+    onPlayState && onPlayState(true);
+  };
+  const playB = btn('Play the move', () => start('move'), { cls: 'primary', ico: 'play' });
+  const plainB = plain ? btn('Without it', () => start('plain'), { cls: 'quiet' }) : null;
+  grid.classList.add('compact');
+  const shapesBox = h('details.shapes', open ? { open: true } : {}, h('summary.label', `chord shapes (${shapes.length})`), grid);
+  const view = h('div.stack', chain, mv.why ? h('p.small', mv.why) : null, h('div.tab-wrap', t), h('div.row', playB, plainB), shapesBox);
+  view.restart = () => {
+    if (mode) {
+      const m = mode;
+      mode = null;
+      start(m);
+    }
+  };
+  return view;
+}
 
 export function cheatBlock(id, open) {
   const c = CHEATS[id];
@@ -81,14 +153,14 @@ function transport({ onPlay, onMetro, playLabel = 'Hear it' }) {
     }
     playB.classList.toggle('on', mode === 'play');
     metB.classList.toggle('on', mode === 'metro');
-    playB.querySelector('span').textContent = mode === 'play' ? 'Stop' : playLabel;
+    setBtn(playB, mode === 'play' ? 'Stop' : playLabel, mode === 'play' ? 'stop' : 'play');
   }
   const row = h('div.row', playB, onMetro ? metB : null);
   row.reset = () => {
     mode = null;
     playB.classList.remove('on');
     metB.classList.remove('on');
-    playB.querySelector('span').textContent = playLabel;
+    setBtn(playB, playLabel, 'play');
   };
   row.restart = () => {
     if (mode) {
@@ -111,7 +183,7 @@ function shapeGrid(shapes, labels = []) {
   const grid = h('div.shape-grid');
   shapes.forEach((sh, i) => {
     if (!sh) return;
-    grid.append(h('div.shape-cell', { 'data-i': i }, h('div.nm', h('span', sh.sym), h('span.small.muted', labels[i] || '')), shapeWindow(sh, { sym: sh.sym })));
+    grid.append(h('div.shape-cell', { 'data-i': i }, h('div.nm', h('span', prettyChord(sh.label || sh.sym)), h('span.small', labels[i] || '')), chordBox(sh, { sym: sh.sym })));
   });
   grid.set = (i) => grid.querySelectorAll('.shape-cell').forEach((el) => el.classList.toggle('on', Number(el.dataset.i) === i));
   return grid;
@@ -153,21 +225,20 @@ const RENDER = {
     const { steps, perBar } = A.pickSteps(chords, d.pattern, { sparkle: d.sparkle, melodyTop: d.melodyTop });
     let bpm = st ? st.bpm : item.bpm[0];
     const chips = chordChips(chords, 0);
-    const boardWrap = h('div.fb-wrap');
+    const boardWrap = h('div.nk-wrap');
     let curChord = -1;
     let board = null;
     const showChord = (i, frets, sym) => {
       if (i === curChord && board && board.dataset.frets === String(frets)) return;
       curChord = i;
       const shape = { frets, fingers: shapeFor(sym)?.fingers, sym };
-      board = shapeWindow(shape, { sym, compact: false });
+      board = pickBox(shape, { sym });
       board.dataset.frets = String(frets);
       boardWrap.replaceChildren(board);
       chips.set(i);
     };
     showChord(0, steps[0].frets, steps[0].sym);
-    const cols = steps.map((s) => ({ notes: s.notes.map((n) => ({ s: n.s, f: n.f })), mark: s.slot % 2 === 0 ? String(s.slot / 2 + 1) : '&' }));
-    const t = tab(cols, { label: pat.name + ' tab', beatEvery: perBar });
+    const t = tab(pickColumns(steps), { label: pat.name + ' tab', beatEvery: perBar });
     const tempo = tempoBox(item, st, (b) => {
       bpm = b;
       api.setBpm(b);
@@ -181,7 +252,7 @@ const RENDER = {
           click: true,
           onStep: (step, i) => {
             showChord(step.chordIdx, step.frets, step.sym);
-            board.highlight(step.notes.map((n) => ({ s: n.s, f: n.f, label: FINGER[n.role] })));
+            board.highlight(step.notes.filter((n) => !n.mute).map((n) => ({ s: n.s, f: n.f, label: FINGER[n.role] })));
             t.playhead(i);
             if (step.slot % 2 === 0) tempo.beat(step.slot / 2);
           },
@@ -272,13 +343,13 @@ const RENDER = {
     const to = Math.max(from + 5, Math.max(...fs) + 1);
     let labels = 'degree';
     let bpm = st ? st.bpm : item.bpm[0];
-    const wrap = h('div.fb-wrap');
+    const wrap = h('div.nk-wrap');
     const flats = usesFlats(key);
     const draw = () => {
-      const b = fretboard({
+      const b = neck({
         from: from === 0 ? 0 : from,
         to,
-        dots: notes.map((n) => ({ s: n.s, f: n.f, kind: n.degree === '1' ? 'root' : n.degree === 'b5' ? 'blue' : 'scale', label: labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats) })),
+        dots: notes.map((n) => ({ s: n.s, f: n.f, kind: scaleKind(n.degree), label: labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats) })),
         label: `${key} ${SCALES[d.scale].name} position ${d.position + 1}`,
       });
       wrap.replaceChildren(b);
@@ -308,7 +379,8 @@ const RENDER = {
     const minorish = ['minPent', 'blues', 'minor', 'dorian'].includes(d.scale);
     body.append(
       h('div.row.between', h('div', h('div.eyebrow', 'Today’s key'), h('div.chord-name', key + (minorish ? ' minor' : ' major'))), labelSeg),
-      h('p.small', h('b', SCALES[d.scale].name + ', position ' + (d.position + 1) + '. '), 'Teal = root.'),
+      h('p.small', h('b', SCALES[d.scale].name + ', position ' + (d.position + 1) + '.')),
+      legend(d.scale === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
       wrap,
       h('p.small.muted', 'Up and back down in eighth notes, alternate picking. Keys rotate each time so the shape moves around the neck.'),
       tempo,
@@ -325,7 +397,7 @@ const RENDER = {
     let target = null;
     const ask = h('div.quiz-q', { 'aria-live': 'polite' });
     const fb = h('p.small.muted', ' ');
-    const wrap = h('div.fb-wrap');
+    const wrap = h('div.nk-wrap');
     const next = () => {
       if (q >= TOTAL) return finish();
       const s = rand(d.strings);
@@ -334,7 +406,7 @@ const RENDER = {
       ask.textContent = `Find ${noteName(target.pcv)} on the ${['low E', 'A', 'D', 'G', 'B', 'high e'][s]} string`;
       draw([]);
     };
-    const draw = (dots) => wrap.replaceChildren(fretboard({ from: 0, to: 12, dots, onTap: tap, label: 'Tap the fretboard' }));
+    const draw = (dots) => wrap.replaceChildren(neck({ from: 0, to: 12, dots, onTap: tap, label: 'Tap the fretboard', fh: 34 }));
     const tap = (s, f) => {
       if (!target) return;
       const ok = s === target.s && fretMidi(s, f) % 12 === target.pcv;
@@ -405,6 +477,20 @@ const RENDER = {
     );
   },
 
+  move(body, item, st, v, api) {
+    const mv = moveBySpec(item.data);
+    if (!mv) return renderGeneric(body, item, st, v, api);
+    let bpm = st ? st.bpm : item.bpm[0];
+    const plain = plainChange(item.data.key, item.data.from, item.data.to);
+    const view = moveView(mv, { getBpm: () => bpm, plain, open: true });
+    const tempo = tempoBox(item, st, (b) => {
+      bpm = b;
+      api.setBpm(b);
+      view.restart();
+    });
+    body.append(h('p.small.muted', MOVE_TYPES[mv.type].how), view, tempo, rateRow(api.rate));
+  },
+
   write(body, item, st, v, api) {
     const go = api.ctx ? api.ctx.go : () => {};
     body.append(
@@ -432,8 +518,8 @@ function tabItem(body, item, st, api, lk, { byEar }) {
   const to = Math.max(from + 4, Math.max(...fs) + 1);
   const flats = usesFlats(lk.key);
   const keyPc = pc(lk.key);
-  const boardWrap = h('div.fb-wrap');
-  const board = fretboard({ from: from <= 1 ? 0 : from, to, dots: notes.map((n) => ({ s: n[0], f: n[1], kind: fretMidi(n[0], n[1]) % 12 === keyPc ? 'root' : 'scale', label: noteLabel(n[0], n[1], flats) })), label: lk.name });
+  const boardWrap = h('div.nk-wrap');
+  const board = neck({ from: from <= 1 ? 0 : from, to, dots: notes.map((n) => ({ s: n[0], f: n[1], kind: scaleDegreeKind(fretMidi(n[0], n[1]), keyPc, lk.scale), label: noteLabel(n[0], n[1], flats) })), label: lk.name });
   boardWrap.append(board);
   let pos = 0;
   const cols = notes.map((n) => {
@@ -615,17 +701,17 @@ export function playoutCard(step, { onDone }) {
   const key = step.key || 'G';
   const kp = pc(key);
   const pent = scalePosition((kp + 9) % 12, 'minPent', 0); // relative-minor box = major pentatonic of the key
-  const wrap = h('div.fb-wrap');
+  const wrap = h('div.nk-wrap');
   const drawBoard = (sym) => {
-    const tones = (() => {
-      try {
-        return CHORDS[sym.replace(/^[A-G][#b]?/, '').split('/')[0]]?.tones.map((t) => (pc(sym) + t) % 12) || [];
-      } catch {
-        return [];
-      }
-    })();
+    let c = null;
+    try {
+      c = parseChord(sym);
+    } catch {
+      c = null;
+    }
+    const tones = c ? CHORDS[c.quality].tones.map((t) => (c.root + t) % 12) : [];
     const fs = pent.map((n) => n.f);
-    wrap.replaceChildren(fretboard({ from: Math.max(0, Math.min(...fs) - 1) || 0, to: Math.max(...fs) + 1, dots: pent.map((n) => ({ s: n.s, f: n.f, kind: tones.includes(fretMidi(n.s, n.f) % 12) ? 'tone' : 'scale', label: noteLabel(n.s, n.f, usesFlats(key)) })), label: 'Notes that fit' }));
+    wrap.replaceChildren(neck({ from: Math.max(0, Math.min(...fs) - 1) || 0, to: Math.max(...fs) + 1, dots: pent.map((n) => ({ s: n.s, f: n.f, kind: tones.includes(fretMidi(n.s, n.f) % 12) ? degreeKind(fretMidi(n.s, n.f), c.root, c.quality) : 'scale', label: noteLabel(n.s, n.f, usesFlats(key)) })), label: 'Notes that fit', fh: 34 }));
   };
   drawBoard(chords[0]);
   const playB = btn('Start the loop', () => {
@@ -647,7 +733,8 @@ export function playoutCard(step, { onDone }) {
   }, { cls: 'primary', ico: 'loop' });
   return h(
     'div.stack-lg',
-    h('div.stack', h('div.row', mascot('hi', 44), h('div', h('div.eyebrow', 'Play it out'), h('h2', 'One minute, anything goes'))), h('p', `Loop: ${step.name || 'your idea'} in ${key}. Strum, pick, hum or noodle on the lit notes. Amber dots are the current chord’s notes: land on one when the chord changes. Mumbling counts.`)),
+    h('div.stack', h('div.eyebrow', 'Play it out'), h('h2', 'One minute. Anything goes.'), h('p', `Loop: ${step.name || 'your idea'} in ${key}. Strum, pick, hum or noodle. The coloured dots are the current chord (orange root, yellow 3rd, blue 5th): land on one when the chord changes. Mumbling counts.`)),
+    legend(['root', 'third', 'fifth', 'scale']),
     h('div.current-chord', now, next),
     wrap,
     h('div.row', playB),

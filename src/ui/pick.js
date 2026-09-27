@@ -1,12 +1,13 @@
 // Pick lab: build a chord sequence, choose a pattern, watch which string to pick next. Save ideas.
-import { h, btn, seg, select, icon, toast, field } from './dom.js';
-import { shapeWindow, tab, strumRow } from './fretboard.js';
+import { h, btn, seg, select, icon, toast, field, setBtn } from './dom.js';
+import { pickBox, tab, strumRow } from './fretboard.js';
+import { pickColumns } from './items.js';
 import * as A from '../audio.js';
 import { PICKS, STRUMS, PROGRESSIONS, SPARKLE, shapeFor, romanChord, progressionChords } from '../content.js';
-import { DIATONIC_MAJOR, BORROWED, capoFor, pc, parseChord } from '../theory.js';
+import { DIATONIC_MAJOR, BORROWED, capoFor, pc, parseChord, prettyChord } from '../theory.js';
 
 const KEYS = ['C', 'G', 'D', 'A', 'E', 'F'];
-const FINGER = { B: 'p', A: 'p', '3': 'i', '2': 'm', '1': 'a' };
+const FINGER = { B: 'p', A: 'p', F: 'p', '3': 'i', '2': 'm', '1': 'a' };
 // What usually sounds good next, by numeral.
 const NEXT = { I: ['IV', 'V', 'vi', 'bVII'], ii: ['V', 'IV'], iii: ['vi', 'IV'], IV: ['I', 'V', 'iv'], V: ['I', 'vi', 'IV'], vi: ['IV', 'ii', 'V'], bVII: ['IV', 'I'], iv: ['I'], bVI: ['bVII', 'V'], III: ['IV', 'vi'], II: ['IV', 'V'] };
 
@@ -34,9 +35,8 @@ export function render(root, ctx) {
   const capo = h('p.small.muted');
   const stageChord = h('span.now', '');
   const stageNext = h('span.next', '');
-  const boardWrap = h('div.fb-wrap');
+  const boardWrap = h('div.nk-wrap');
   const tabWrap = h('div.tab-wrap');
-  const legend = h('div.legend', h('span', h('b', 'p'), ' thumb'), h('span', h('b', 'i'), ' index'), h('span', h('b', 'm'), ' middle'), h('span', h('b', 'a'), ' ring'));
   let board = null;
   let tabEl = null;
   let curShapeKey = '';
@@ -54,12 +54,12 @@ export function render(root, ctx) {
   const drawPalette = () => {
     const chip = (d, borrowed) => {
       const sym = romanChord(lab.key, d.rn);
-      return h('button.chip', { type: 'button', class: borrowed ? 'borrowed' : '', title: d.why || '', onclick: () => add(sym) }, sym, h('span.rn', d.rn));
+      return h('button.chip', { type: 'button', class: borrowed ? 'borrowed' : '', title: d.why || '', onclick: () => add(sym) }, prettyChord(sym), h('span.rn', d.rn.replace('b', '♭')));
     };
     palette.replaceChildren(
       h('div.chips', DIATONIC_MAJOR.map((d) => chip(d, false))),
       h('div.chips', BORROWED.map((d) => chip(d, true))),
-      h('p.small.muted', 'Top row: the chords that live in ', lab.key, '. Dashed: borrowed chords, the ones that make it sound like a record.'),
+      h('p.small.muted', 'Top row: the six chords that live in ', lab.key, '. Dashed: borrowed chords, the ones that make it sound like a record.'),
     );
   };
 
@@ -72,17 +72,18 @@ export function render(root, ctx) {
   const drawProg = () => {
     progRow.replaceChildren(
       ...lab.chords.map((c, i) =>
-        h('button.chip.on', { type: 'button', 'data-i': i, 'aria-label': `Remove ${c}`, onclick: () => {
+        h('button.chip.on', { type: 'button', 'data-i': i, 'aria-label': `Remove ${prettyChord(c)}`, onclick: () => {
           lab.chords = lab.chords.filter((_, j) => j !== i);
           refresh();
-        } }, c, h('span.rn', numeralOf(lab.key, c) || ''), icon('close', 14)),
+        } }, prettyChord(c), h('span.rn', (numeralOf(lab.key, c) || '').replace('b', '♭')), icon('close', 14)),
       ),
     );
     if (!lab.chords.length) progRow.append(h('span.small.muted', 'Tap chords above to build a loop.'));
     const last = lab.chords[lab.chords.length - 1];
     const rn = last && numeralOf(lab.key, last);
     const nexts = rn && NEXT[rn] ? NEXT[rn].map((r) => romanChord(lab.key, r)) : [];
-    suggest.replaceChildren(nexts.length ? 'Sounds nice next: ' : '', ...nexts.map((s) => h('button.chip', { type: 'button', style: { minHeight: '32px', marginLeft: '4px' }, onclick: () => add(s) }, s)));
+    suggest.replaceChildren(...(nexts.length ? [h('span.label', 'sounds nice next')] : []), ...nexts.map((s) => h('button.chip', { type: 'button', onclick: () => add(s) }, prettyChord(s))));
+    suggest.className = 'row';
     const c = capoFor(lab.key)[0];
     capo.textContent = c && c.capo > 0 ? `Tip: capo ${c.capo} with ${c.shapes} shapes also gives you ${lab.key}.` : '';
   };
@@ -91,7 +92,7 @@ export function render(root, ctx) {
     const k = sym + frets;
     if (k !== curShapeKey) {
       curShapeKey = k;
-      board = shapeWindow({ frets, fingers: shapeFor(sym)?.fingers, sym }, { sym, compact: false });
+      board = pickBox({ frets, fingers: shapeFor(sym)?.fingers, sym }, { sym });
       boardWrap.replaceChildren(board);
     }
     if (notes && board) board.highlight(notes);
@@ -105,18 +106,16 @@ export function render(root, ctx) {
       stageChord.textContent = '';
       return;
     }
-    stageChord.textContent = chords[0];
+    stageChord.textContent = prettyChord(chords[0]);
     stageNext.textContent = chords.length > 1 ? 'then ' + chords[1] : '';
     if (isStrum()) {
       tabEl = strumRow(STRUMS[lab.pattern].slots);
       const sh = shapeFor(chords[0]);
       if (sh) showChord(chords[0], sh.frets);
-      legend.hidden = true;
     } else {
       const { steps, perBar } = A.pickSteps(chords, lab.pattern, { sparkle: lab.sparkle, melodyTop: lab.melodyTop, key: pc(lab.key) });
-      tabEl = tab(steps.map((s) => ({ notes: s.notes.map((n) => ({ s: n.s, f: n.f })), mark: s.slot % 2 === 0 ? String(s.slot / 2 + 1) : '&' })), { beatEvery: perBar, label: 'Pattern tab' });
+      tabEl = tab(pickColumns(steps), { beatEvery: perBar, label: 'Pattern tab' });
       if (steps[0]) showChord(steps[0].sym, steps[0].frets);
-      legend.hidden = false;
     }
     tabWrap.replaceChildren(tabEl);
   };
@@ -160,16 +159,16 @@ export function render(root, ctx) {
     if (!lab.chords.length) return toast('Add some chords first.');
     playing = true;
     playB.classList.add('on');
-    playB.querySelector('span').textContent = 'Stop';
+    setBtn(playB, 'Stop', 'stop');
     const onStep = (step, i) => {
-      stageChord.textContent = step.sym;
+      stageChord.textContent = prettyChord(step.sym);
       stageNext.textContent = lab.chords.length > 1 ? 'then ' + lab.chords[(step.chordIdx + 1) % lab.chords.length] : '';
-      progRow.querySelectorAll('.chip').forEach((c, j) => c.style.outline = j === step.chordIdx ? '3px solid var(--amber)' : '');
+      progRow.querySelectorAll('.chip').forEach((c, j) => c.classList.toggle('playing', j === step.chordIdx));
       if (isStrum()) {
         showChord(step.sym, step.frets);
         tabEl.playhead(step.slot);
       } else {
-        showChord(step.sym, step.frets, step.notes.map((n) => ({ s: n.s, f: n.f, label: FINGER[n.role] })));
+        showChord(step.sym, step.frets, step.notes.filter((n) => !n.mute).map((n) => ({ s: n.s, f: n.f, label: FINGER[n.role] })));
         tabEl.playhead(i);
       }
     };
@@ -180,8 +179,8 @@ export function render(root, ctx) {
     playing = false;
     A.stopAll();
     playB.classList.remove('on');
-    playB.querySelector('span').textContent = 'Play';
-    progRow.querySelectorAll('.chip').forEach((c) => (c.style.outline = ''));
+    setBtn(playB, 'Play', 'play');
+    progRow.querySelectorAll('.chip').forEach((c) => c.classList.remove('playing'));
   }
 
   const ideaName = h('input', { type: 'text', id: 'idea-name', placeholder: 'Name this idea', 'aria-label': 'Idea name', maxlength: 40 });
@@ -232,12 +231,12 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Pick lab'), h('p.muted', 'Build a loop, pick a pattern, and watch which string to play next. Amber = pluck now.')),
-      h('section.stack', h('div.eyebrow', 'Key'), keyHolder, palette),
-      h('section.card.stack', h('div.row.between', h('div.eyebrow', 'Your loop'), presetSel), progRow, suggest, capo),
-      h('section.stack', h('div.fields', field('Pattern', patternSel), field('Tempo', h('div.row.nowrap', bpmInput, bpmLabel))), feel, h('div.row', sparkleB, melodyB)),
-      h('section.card.raised.stack', h('div.current-chord', stageChord, stageNext), boardWrap, legend, tabWrap, h('div.row', playB)),
-      h('section.stack', h('div.eyebrow', 'Save it'), h('div.row.nowrap', h('div.grow', ideaName), btn('Save idea', () => {
+      h('div.stack', h('h1', 'Pick lab'), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
+      h('section.stack', h('div.label', 'key'), keyHolder, palette),
+      h('section.sect', h('div.sect-head', h('h2', 'Your loop'), presetSel), progRow, suggest, capo),
+      h('section.sect', h('div.fields', field('pattern', patternSel), field('tempo', h('div.row.nowrap', bpmInput, bpmLabel))), feel, h('div.row', sparkleB, melodyB)),
+      h('section.panel.stack', h('div.current-chord', stageChord, stageNext), boardWrap, tabWrap, h('div.row', playB)),
+      h('section.sect', h('h2', 'Save it'), h('div.row.nowrap', h('div.grow', ideaName), btn('Save idea', () => {
         if (!lab.chords.length) return toast('Add some chords first.');
         const name = ideaName.value.trim() || `Idea ${(ctx.state.ideas || []).length + 1}`;
         ctx.update((s) => ({ ...s, ideas: [{ id: 'i' + Date.now().toString(36), name, key: lab.key, chords: lab.chords, pattern: lab.pattern, bpm: lab.bpm, sparkle: lab.sparkle, melodyTop: lab.melodyTop, created: ctx.day }, ...(s.ideas || [])].slice(0, 60) }));

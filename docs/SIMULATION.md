@@ -6,36 +6,37 @@
 
 | Variant | Items locked in | Minutes practised | Locked per hour | Goal milestone (m4) reached | Day reached |
 |---|---|---|---|---|---|
-| Chosen: lapse→30%, long-gap bonus, backlog throttle, shakiest first, pace-adaptive cap | 66.0 | 1978 | 2.00 | 100% | 116 |
-| Fixed work-in-progress cap 8 | 66.0 | 1948 | 2.03 | 100% | 132 |
-| Lapse resets to zero | 66.0 | 1982 | 2.00 | 100% | 121 |
-| Lapse keeps 60% | 66.0 | 1959 | 2.02 | 100% | 121 |
-| No long-gap bonus | 66.0 | 1986 | 1.99 | 100% | 117 |
-| No backlog throttle | 66.0 | 1980 | 2.00 | 100% | 115 |
-| Due-date order (not shakiest first) | 66.0 | 2003 | 1.98 | 100% | 123 |
-| Tempo steps of 5% | 66.0 | 2088 | 1.90 | 100% | 137 |
-| Tempo steps of 15% | 66.0 | 2039 | 1.94 | 100% | 115 |
-| Fixed work-in-progress cap 16 | 66.0 | 2006 | 1.97 | 100% | 102 |
-| No work-in-progress cap | 66.0 | 2106 | 1.88 | 100% | 103 |
+| Chosen: lapse→30%, long-gap bonus, backlog throttle, shakiest first, pace-adaptive cap | 103.0 | 2857 | 2.16 | 100% | 148 |
+| Fixed work-in-progress cap 8 | 83.7 | 2358 | 2.13 | 0% | — |
+| Lapse resets to zero | 103.0 | 2860 | 2.16 | 100% | 146 |
+| Lapse keeps 60% | 102.9 | 2826 | 2.19 | 96% | 145 |
+| No long-gap bonus | 103.0 | 2866 | 2.16 | 100% | 144 |
+| No backlog throttle | 103.0 | 2854 | 2.16 | 100% | 143 |
+| Due-date order (not shakiest first) | 103.0 | 2885 | 2.14 | 100% | 145 |
+| Tempo steps of 5% | 102.5 | 3040 | 2.02 | 92% | 159 |
+| Tempo steps of 15% | 103.0 | 2964 | 2.08 | 100% | 143 |
+| Fixed work-in-progress cap 16 | 103.0 | 2831 | 2.18 | 100% | 153 |
+| No work-in-progress cap | 103.0 | 2980 | 2.07 | 100% | 135 |
 
 ## 2. Calibration (365-day runs, so later milestones are reached often enough to check)
 
-Reps to lock in, by kind (measured): pick 18.1, strum 12.6, barre 17.7, scale 16.3, notes 14.7, lick 14.5, melody 14.6, prog 12.4, write 16.1, ear 18.1
-Overhead (reviews of locked items, intros and play-outs per learning minute): 1.42
+Reps to lock in, by kind (measured): pick 18.3, strum 12.9, barre 18, scale 16.7, notes 14.5, lick 14.8, melody 14.9, prog 12.7, write 16.3, ear 18.5, move 15.5
+Overhead (reviews of locked items, intros and play-outs per learning minute): 1.33
 
-Forecast accuracy with the previous calibration: predicted/actual median 1.08 (IQR 0.67–1.72, n=144)
-After measuring reps per kind: median 0.45 (IQR 0.30–0.70, n=143)
-Correction factor applied to all countdowns: ×2.23
-Forecast accuracy after recalibration: predicted/actual median 1.00 (IQR 0.68–1.57, n=143)
-Lazy learner, 180 days: adaptive cap locks 20.0 items, a fixed cap of 16 locks 15.5.
-Cross-check on a "lazy" learner (60% of days, 2-20 min): median 1.09 (IQR 0.72–1.64, n=427); goal milestone reached by 0% on day —
+Forecast accuracy with the previous calibration: predicted/actual median 0.80 (IQR 0.53–1.19, n=183)
+After measuring reps per kind: median 0.33 (IQR 0.22–0.48, n=181)
+Correction factor applied to all countdowns: ×2.99
+Forecast accuracy after recalibration: predicted/actual median 1.00 (IQR 0.66–1.44, n=181)
+Lazy learner, 180 days: adaptive cap locks 20.1 items, a fixed cap of 16 locks 16.0.
+Cross-check on a "lazy" learner (60% of days, 2-20 min): median 1.56 (IQR 0.98–2.26, n=433); goal milestone reached by 0% on day —
 
 ## 3. Milestones at your pace over a year (after calibration)
 
 | Milestone | Reached within 365 days | Average day |
 |---|---|---|
-| Travis on autopilot | 100% | 72 |
-| Pretty chords | 100% | 97 |
-| Know the neck | 100% | 108 |
-| Noodle & write | 100% | 116 |
-| Solo over a jam | 100% | 116 |
+| Travis on autopilot | 100% | 77 |
+| Pretty chords | 100% | 113 |
+| Smooth changes | 100% | 131 |
+| Know the neck | 100% | 141 |
+| Noodle & write | 100% | 147 |
+| Solo over a jam | 100% | 148 |

@@ -4,11 +4,11 @@ import { isDue, isLocked, shakiness, retrievability } from './srs.js';
 import { forecast, paceFor } from './progress.js';
 
 // Work in progress: how many unfinished items may be on the go before new material waits.
-// Tuned by simulation: 8 suits 5 min/day, 16 suits 20-30 min/day, so it scales with your real pace.
+// Tuned by simulation: about 8 suits 5 min a day, about 24 suits 20 min a day, so it scales with your real pace.
 export function wipCapFor(state, day) {
   const p = paceFor(state, day).pace;
   const guitar = p.hands + p.neck + p.create;
-  return Math.max(6, Math.min(16, Math.round(4 + guitar / 2)));
+  return Math.max(6, Math.min(30, Math.round(2 + guitar * 1.1)));
 }
 
 export const LENGTHS = [

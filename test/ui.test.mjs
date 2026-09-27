@@ -64,7 +64,7 @@ async function noHorizontalScroll(page, where) {
   assert.ok(sw <= cw + 1, `${where}: page scrolls sideways (${sw} > ${cw})`);
 }
 
-const TABS = ['today', 'pick', 'neck', 'jam', 'ear', 'you'];
+const TABS = ['today', 'neck', 'pick', 'moves', 'jam', 'you'];
 
 for (const [w, h] of [[390, 844], [360, 740]])
   for (const dark of [false, true])
@@ -146,7 +146,7 @@ test('pick lab: build a loop, play it, save it as an idea', { skip }, async () =
   await page.click('.chips >> nth=0 >> .chip >> nth=5'); // vi
   assert.equal(await page.locator('#prog-row .chip').count(), before + 1);
   await page.click('#lab-play');
-  await page.waitForSelector('.fb-hit', { timeout: 3000 });
+  await page.waitForSelector('.nk-hit', { timeout: 3000 });
   await page.screenshot({ path: join(SHOTS, 'pick-playing.png') });
   await page.click('#lab-play');
   await page.selectOption('#pattern', 'faithful');
@@ -157,11 +157,37 @@ test('pick lab: build a loop, play it, save it as an idea', { skip }, async () =
   await ctx.close();
 });
 
+test('moves: every connection plays, and one can be added to practice', { skip }, async () => {
+  const { page, ctx, errors } = await open();
+  await page.click('#tab-moves');
+  await page.click('#mv-key button:has-text("C")');
+  await page.click('#mv-from button:has-text("C") >> nth=0');
+  await page.click('#mv-to button:has-text("Am")');
+  const text = await page.textContent('#main');
+  assert.match(text, /G\/B/, 'offers the C – G/B – Am walk-down');
+  assert.match(text, /E7/, 'offers the E7 secondary dominant');
+  const plays = page.locator('button:has-text("Play the move")');
+  assert.ok((await plays.count()) >= 5);
+  await plays.nth(0).click();
+  await page.waitForTimeout(400);
+  await plays.nth(0).click();
+  await noHorizontalScroll(page, 'moves');
+  const adds = page.locator('button:has-text("Practise this")');
+  if (await adds.count()) {
+    await adds.nth(0).click();
+    const st = await page.evaluate(() => JSON.parse(localStorage.getItem('guitar-lazy-state-v1')));
+    assert.equal(Object.values(st.custom).filter((c) => c.kind === 'move').length, 1);
+  }
+  await page.screenshot({ path: join(SHOTS, 'moves-C-Am.png'), fullPage: true });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
 test('neck: tapping a C shape names it C', { skip }, async () => {
   const { page, ctx, errors } = await open();
   await page.click('#tab-neck');
   await page.click('#neck-mode button:has-text("Name it")');
-  const tap = async (s, f) => page.locator('.fb-tap').nth(s * 13 + f).click({ force: true });
+  const tap = async (s, f) => page.locator('.nk-tap').nth(s * 13 + f).click({ force: true });
   await tap(1, 3);
   await tap(2, 2);
   await tap(3, 0);
@@ -174,7 +200,7 @@ test('neck: tapping a C shape names it C', { skip }, async () => {
 
 test('ear quiz scores itself', { skip }, async () => {
   const { page, ctx, errors } = await open();
-  await page.click('#tab-ear');
+  await page.click('#go-ear');
   await page.click('button:has-text("Quiz") >> nth=0');
   await page.click('button:has-text("Start")');
   for (let i = 0; i < 6; i++) {
@@ -208,7 +234,7 @@ test('you: add a song to the repertoire', { skip }, async () => {
 
 test('progress syncs to the Claude account and AI extras validate their output', { skip }, async () => {
   const { page, ctx, errors } = await open({ fake: true });
-  await page.click('#tab-ear');
+  await page.click('#go-ear');
   await page.click('button:has-text("Quiz") >> nth=0');
   await page.click('button:has-text("Start")');
   for (let i = 0; i < 6; i++) {

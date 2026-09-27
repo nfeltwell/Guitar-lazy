@@ -1,6 +1,5 @@
 // Ear: quick quizzes, plus a hands-free spoken mode for walks and commutes.
 import { h, btn, seg } from './dom.js';
-import { mascot } from './mascot.js';
 import { itemCard, earQuestion } from './items.js';
 import * as A from '../audio.js';
 import { ITEMS, ITEM_BY_ID, LICKS } from '../content.js';
@@ -34,9 +33,9 @@ export function render(root, ctx, params) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Ear'), h('p.muted', 'For dead time: walks, the bus, washing up. No guitar needed. Licks you sing now come back later with the guitar in hand.')),
-      h('section.card.raised.stack', h('div.row.nowrap', mascot('focus', 44), h('div', h('h3', 'Hands-free mode'), h('p.small.muted', 'Like a course on tape. It says the question, plays the sound, pauses for you to answer out loud, then tells you. Headphones in, phone in pocket.'))), minsHolder, startB, stage, A.canSpeak() ? null : h('p.small.muted', 'This browser has no voice, so prompts appear as captions only.')),
-      h('section.stack', h('div.eyebrow', 'Quizzes'), list),
+      h('div.stack', btn('Back', () => ctx.go('today'), { cls: 'ghost small', ico: 'back' }), h('h1', 'Ear'), h('p.muted', 'For dead time: walks, the bus, washing up. No guitar needed. Licks you sing now come back later with the guitar in hand.')),
+      h('section.sect', h('h2', 'Hands-free'), h('p.small.muted', 'Like a course on tape. It says the question, plays the sound, pauses while you answer out loud, then tells you. Headphones in, phone in pocket.'), minsHolder, startB, stage, A.canSpeak() ? null : h('p.small.muted', 'This browser has no voice, so prompts appear as captions only.')),
+      h('section.sect', h('h2', 'Quizzes'), list),
     ),
   );
   if (params && params.handsFree && !hf.running) {
@@ -138,7 +137,7 @@ async function startHandsFree(ctx, stage, startB) {
       }
       return { ...out, items: itemsState };
     });
-    stage.replaceChildren(mascot('done', 60), h('p', 'Logged ' + mins + ' min.' + (heard.size ? ' The licks you sang are queued for your next guitar session.' : '')));
+    stage.replaceChildren(h('p', 'Logged ' + mins + ' min.' + (heard.size ? ' The licks you sang are queued for your next guitar session.' : '')));
   };
   stage.replaceChildren(
     h('div.said', 'How did you do?'),

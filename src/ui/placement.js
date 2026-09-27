@@ -1,6 +1,5 @@
 // Placement check: say what you can do, prove a few items, skip what you already play.
 import { h, btn, seg } from './dom.js';
-import { mascot } from './mascot.js';
 import { itemCard } from './items.js';
 import { PLACEMENT, ITEM_BY_ID } from '../content.js';
 import { applyPlacement } from '../state.js';
@@ -39,9 +38,9 @@ function renderAsk(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.top', h('div.stack', h('div.eyebrow', 'Placement check · 1 of 3'), h('h1', 'What can you already do?'), h('p.muted', 'I filled these in from what you told me. Change anything that is off.')), mascot('focus', 54)),
-      h('section.card.stack-lg', ...rows),
-      h('section.card.stack', h('div', 'On an average day, how long do you play?'), h('p.small.muted', 'Averaged over the week, including long weekends and days off. The countdown uses this until it has two weeks of your real history.'), dailyHolder),
+      h('div.stack', h('div.label', 'placement check · 1 of 3'), h('h1', 'What can you already do?'), h('p.muted', 'Filled in from what you told me. Change anything that’s off.')),
+      h('section.sect.stack-lg', ...rows),
+      h('section.sect', h('h3', 'On an average day, how long do you play?'), h('p.small.muted', 'Averaged over the week, including long weekends and days off. The countdown uses this until it has two weeks of your real history.'), dailyHolder),
       btn('Next: play a few things', () => {
         stage.step = 'test';
         ctx.rerender();
@@ -70,7 +69,7 @@ function renderTest(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('div.eyebrow', `Placement check · 2 of 3 · test ${stage.t + 1} of ${ids.length}`), h('p.muted', 'Try it at the tempo shown. Clean means you could play it on a recording. Be honest: a wrong "clean" just skips something you need.')),
+      h('div.stack', h('div.label', `placement check · 2 of 3 · test ${stage.t + 1} of ${ids.length}`), h('p.muted', 'Try it at the tempo shown. Clean means you could play it on a recording. Be honest: a wrong "clean" just skips something you need.')),
       card,
       btn('I haven’t learned this yet', () => {
         stage.tested[item.id] = 'miss';
@@ -89,8 +88,8 @@ function renderSummary(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('div.eyebrow', 'Placement check · 3 of 3'), h('h1', 'Here’s where you start'), h('p.muted', names.length ? `Skipping ${names.length} things you already play. They come back for a quick check in a week or two, in case.` : 'Nothing skipped. Day one starts from the top.')),
-      names.length ? h('section.card', h('ul', { style: { margin: 0, paddingLeft: '18px' } }, names.map((n) => h('li', n)))) : null,
+      h('div.stack', h('div.label', 'placement check · 3 of 3'), h('h1', 'Here’s where you start'), h('p.muted', names.length ? `Skipping ${names.length} things you already play. They come back for a quick check in a week or two, in case.` : 'Nothing skipped. Day one starts from the top.')),
+      names.length ? h('section.sect', h('ul', { style: { margin: 0, paddingLeft: '18px' } }, names.map((n) => h('li', n)))) : null,
       h('p', 'Your first sessions focus on fingerpicking and the fretboard, the two gaps you named. Theory shows up only when it unlocks something you can play.'),
       btn('Start playing', () => {
         ctx.update((s) => ({ ...applyPlacement(s, stage.answers, stage.tested, ctx.day), settings: { ...s.settings, dailyMins: stage.daily } }));

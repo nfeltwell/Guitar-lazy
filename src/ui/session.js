@@ -1,6 +1,5 @@
 // The session runner: steps from the planner, one card at a time, then "Done. Go live your life."
 import { h, btn, icon, toast } from './dom.js';
-import { mascot } from './mascot.js';
 import { itemCard, songCard, playoutCard } from './items.js';
 import { plan, findItem } from '../planner.js';
 import { forecast, streak, formatDuration, formatMinutes, milestoneStatus } from '../progress.js';
@@ -100,7 +99,7 @@ function renderDone(root, ctx) {
   const reached = msNow.filter((m, i) => m.done && !s.beforeMs[i].done);
   const saved = s.before.idx === after.idx ? s.before.totalMinutes - after.totalMinutes : null;
   const lines = [];
-  if (reached.length) lines.push(h('p.card.tint', h('b', 'Milestone reached: ' + reached.map((m) => m.name).join(', ') + '. '), 'That one is real. Go and play it for someone.'));
+  if (reached.length) lines.push(h('p.panel', h('b', 'Milestone reached: ' + reached.map((m) => m.name).join(', ') + '. '), 'That one is real. Go and play it for someone.'));
   if (s.locked.length) lines.push(h('p', h('b', 'Locked in today: '), s.locked.join(', '), '.'));
   if (saved != null && saved > 0.5) lines.push(h('p', `${after.milestone.name} is ${formatMinutes(saved)} closer. About ${formatDuration(after.days)} to go at this pace.`));
   else lines.push(h('p', `${after.milestone.name}: about ${formatDuration(after.days)} to go at this pace.`));
@@ -112,8 +111,8 @@ function renderDone(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.done-hero', mascot('done', 92), h('h1', 'Done. Go live your life.'), h('p.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
-      h('section.card.stack', ...lines, h('p.small.muted', honest)),
+      h('div.done-hero', h('div.label', 'session complete'), h('h1', 'Done. Go live your life.'), h('p.mono.small.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
+      h('section.sect', ...lines, h('p.small.muted', honest)),
       h('div.row', btn('Back to today', () => {
         session = null;
         ctx.go('today');

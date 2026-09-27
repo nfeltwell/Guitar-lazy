@@ -87,7 +87,8 @@ const P = {
   stop: 'M7 7h10v10H7z',
   today: 'M12 3v2M12 19v2M4.2 7l1.7 1M18.1 16l1.7 1M4.2 17l1.7-1M18.1 8l1.7-1M8 12a4 4 0 1 0 8 0a4 4 0 1 0-8 0',
   pick: 'M12 20c-3-2-7-6-7-10a7 4.5 0 0 1 14 0c0 4-4 8-7 10z',
-  neck: 'M4 8h16M4 12h16M4 16h16M8 5v14M14 5v14',
+  moves: 'M3 19h5v-5h5V9h5V4h3',
+  neck: 'M7 3v18M10 3v18M14 3v18M17 3v18M5 7h14M5 12h14M5 17h14',
   jam: 'M9 18V6l10-2v12M9 18a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0M19 16a2.5 2.5 0 1 1-5 0a2.5 2.5 0 1 1 5 0',
   ear: 'M8 18c0 2 3 3 4.5 1.5S14 16 15.5 14.5S18 11 18 9a6 6 0 0 0-12 0M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-1.5 2-2.5 3',
   you: 'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4.5 20c1-4 4-6 7.5-6s6.5 2 7.5 6',
@@ -110,6 +111,14 @@ export function icon(name, size = 22) {
   const filled = name === 'play' || name === 'stop';
   s.append(svg('path', { d: P[name], fill: filled ? 'currentColor' : 'none', stroke: filled ? 'none' : 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
   return s;
+}
+
+// Swap a button's label and icon in place (Play <-> Stop).
+export function setBtn(b, label, ico) {
+  const span = b.querySelector('span');
+  if (span) span.textContent = label;
+  const old = b.querySelector('svg.icon');
+  if (old && ico) old.replaceWith(icon(ico, 20));
 }
 
 export function btn(label, onclick, { cls = '', ico, id, title, disabled } = {}) {

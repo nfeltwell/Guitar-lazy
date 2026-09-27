@@ -62,6 +62,7 @@ export const CHORDS = {
   dim: { name: 'diminished', tones: [0, 3, 6], opt: [] },
   aug: { name: 'augmented', tones: [0, 4, 8], opt: [] },
   m7b5: { name: 'half-diminished', tones: [0, 3, 6, 10], opt: [] },
+  mmaj7: { name: 'minor-major 7', tones: [0, 3, 7, 11], opt: [7] },
 };
 
 // Parse "F#m7", "Cadd9", "G/B", "Bbmaj7".
@@ -71,6 +72,11 @@ export function parseChord(sym) {
   const quality = m[2];
   if (!(quality in CHORDS)) throw new Error('Unknown chord quality "' + quality + '" in ' + sym);
   return { root: pc(m[1]), rootName: m[1], quality, bass: m[3] ? pc(m[3]) : null, bassName: m[3] || null };
+}
+
+// Symbols are stored plainly (Ammaj7); show them the way chord books write them.
+export function prettyChord(sym) {
+  return String(sym).replace(/mmaj7/, 'm(maj7)').replace(/b(?=\d)/g, '♭').replace(/^([A-G])b/, '$1♭').replace(/\/([A-G])b/, '/$1♭');
 }
 
 export function chordTones(sym) {
@@ -101,6 +107,7 @@ export function shapeMatches(frets, sym) {
   const c = parseChord(sym);
   const q = CHORDS[c.quality];
   const want = q.tones.map((t) => (c.root + t) % 12);
+  if (c.bass != null) want.push(c.bass); // a slash bass may sit outside the chord (Am/G)
   const have = shapePcs(frets);
   if (have.some((p) => !want.includes(p))) return { ok: false, why: 'contains a note outside ' + sym };
   const required = q.tones.filter((t) => !q.opt.includes(t)).map((t) => (c.root + t) % 12);
@@ -126,7 +133,7 @@ export function identifyChord(frets, preferFlats = false) {
       let score = 0;
       if (bass === root) score += 10;
       score -= def.tones.length - have.length; // fewer omitted tones
-      score -= ['dim', 'aug', 'm7b5', '7sus4', 'maj9', 'm9', 'm6', '6'].includes(q) ? 1 : 0;
+      score -= ['dim', 'aug', 'm7b5', '7sus4', 'maj9', 'm9', 'm6', '6', 'mmaj7'].includes(q) ? 1 : 0;
       if (q === '' || q === 'm') score += 1;
       const name = noteName(root, preferFlats) + q + (bass !== root ? '/' + noteName(bass, preferFlats) : '');
       results.push({ name, score, root, quality: q });

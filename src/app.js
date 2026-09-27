@@ -11,17 +11,18 @@ import * as neck from './ui/neck.js';
 import * as jam from './ui/jam.js';
 import * as ear from './ui/ear.js';
 import * as you from './ui/you.js';
+import * as moves from './ui/movesTab.js';
 
-const SCREENS = { today, session, placement, pick, neck, jam, ear, you };
+const SCREENS = { today, session, placement, pick, neck, moves, jam, ear, you };
 const TABS = [
   ['today', 'Today', 'today'],
-  ['pick', 'Pick', 'pick'],
   ['neck', 'Neck', 'neck'],
+  ['pick', 'Pick', 'pick'],
+  ['moves', 'Moves', 'moves'],
   ['jam', 'Jam', 'jam'],
-  ['ear', 'Ear', 'ear'],
   ['you', 'You', 'you'],
 ];
-const TAB_OF = { session: 'today', placement: 'today' };
+const TAB_OF = { session: 'today', placement: 'today', ear: 'today' };
 
 export function boot(mount) {
   const day = dayNumber();

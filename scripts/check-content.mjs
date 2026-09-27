@@ -3,6 +3,7 @@
 import { SHAPES, BARRES, barreShape, SPARKLE, PICKS, STRUMS, PROGRESSIONS, LICKS, MELODIES, CHEATS, ITEMS, ITEM_BY_ID, MILESTONES, PLACEMENT, TRACKS, FRIENDLY_KEYS, romanChord, shapeFor, roleStrings } from '../src/content.js';
 import { shapeMatches, fingersNeeded, shapeSpan, SCALES, pc, fretMidi, parseChord, noteName, DIATONIC_MAJOR, BORROWED, INTERVALS } from '../src/theory.js';
 import { pickSteps, strumSteps } from '../src/audio.js';
+import { generateMoves, moveBySpec, eventNotes } from '../src/moves.js';
 
 export function audit() {
   const errors = [];
@@ -38,7 +39,7 @@ export function audit() {
   // Sparkle alternates
   for (const [k, alts] of Object.entries(SPARKLE)) for (const a of alts) if (!SHAPES[a]) err('sparkle ' + k, a + ' has no shape');
   // Picking patterns
-  const ROLES = new Set(['B', 'A', '1', '2', '3']);
+  const ROLES = new Set(['B', 'A', 'F', 'X', '1', '2', '3']);
   for (const [id, p] of Object.entries(PICKS)) {
     const want = { 4: 8, 6: 12, 3: 6 }[p.meter];
     if (p.slots.length !== want) err('pick ' + id, `meter ${p.meter} needs ${want} slots, has ${p.slots.length}`);
@@ -94,9 +95,46 @@ export function audit() {
   for (const [id, lk] of Object.entries(LICKS)) checkTab('lick', id, lk);
   for (const [id, lk] of Object.entries(MELODIES)) checkTab('melody', id, lk);
 
+  // Moves: sweep every key and chord pair. Notes on the neck, shapes spell their chords,
+  // and only the deliberately chromatic moves leave the key.
+  let moveCount = 0;
+  for (const key of FRIENDLY_KEYS) {
+    const chords = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'bVII'].map((rn) => romanChord(key, rn));
+    const scale = SCALES.major.steps.map((s) => (s + pc(key)) % 12);
+    for (const x of chords)
+      for (const y of chords) {
+        if (x === y) continue;
+        let moves;
+        try {
+          moves = generateMoves(key, x, y);
+        } catch (e) {
+          err(`moves ${key} ${x}>${y}`, e.message);
+          continue;
+        }
+        for (const m of moves) {
+          moveCount++;
+          const where = `move ${m.id}`;
+          if (!(m.beats >= 8 && m.beats <= 16)) err(where, 'odd length');
+          for (const e of m.events) {
+            if (e.shape) {
+              const ok = shapeMatches(e.shape.frets, e.shape.sym);
+              if (!ok.ok) err(where, `${e.shape.sym}: ${ok.why}`);
+            }
+            for (const n of eventNotes(e)) {
+              if (!(n.s >= 0 && n.s <= 5 && n.f >= 0 && n.f <= 12)) err(where, 'note off the neck');
+              if (e.kind === 'note' && !m.chromatic && !scale.includes(fretMidi(n.s, n.f) % 12)) err(where, `${noteName(fretMidi(n.s, n.f) % 12)} is outside ${key} major`);
+            }
+          }
+          const walk = m.events.filter((e) => e.kind === 'note' && e.s <= 2);
+          for (let i = 1; i < walk.length; i++) if (Math.abs(fretMidi(walk[i].s, walk[i].f) - fretMidi(walk[i - 1].s, walk[i - 1].f)) > 2) err(where, 'bass walk jumps more than a whole step');
+        }
+      }
+  }
+  audit.moveCount = moveCount;
+
   // Items
   const ids = new Set();
-  const KINDS = new Set(['pick', 'strum', 'change', 'barre', 'scale', 'notes', 'lick', 'melody', 'prog', 'write', 'ear']);
+  const KINDS = new Set(['pick', 'strum', 'change', 'barre', 'scale', 'notes', 'lick', 'melody', 'prog', 'write', 'ear', 'move']);
   for (const it of ITEMS) {
     const w = 'item ' + it.id;
     if (ids.has(it.id)) err(w, 'duplicate id');
@@ -114,14 +152,14 @@ export function audit() {
         for (const c of d.chords) if (!shapeFor(c)) err(w, 'no shape for ' + c);
         const { steps } = pickSteps(d.chords, d.pattern, { sparkle: d.sparkle, melodyTop: d.melodyTop });
         for (const st of steps)
-          for (const n of st.notes) {
+          for (const n of st.notes.filter((x) => !x.mute)) {
             if (n.s < 0 || n.s > 5) err(w, 'role maps off the strings');
             if (n.f < 0) err(w, `plucks a muted string on ${st.sym}`);
           }
         if (d.melodyTop) {
           const key = parseChord(d.chords[0]).root;
           const scale = SCALES.major.steps.map((x) => (x + key) % 12);
-          for (const st of steps) for (const n of st.notes) if (!scale.includes(fretMidi(n.s, n.f) % 12)) err(w, `melody note ${noteName(fretMidi(n.s, n.f) % 12)} is out of key`);
+          for (const st of steps) for (const n of st.notes.filter((x) => !x.mute)) if (!scale.includes(fretMidi(n.s, n.f) % 12)) err(w, `melody note ${noteName(fretMidi(n.s, n.f) % 12)} is out of key`);
         }
       }
     }
@@ -136,6 +174,11 @@ export function audit() {
       for (const k of d.keys) pc(k);
     }
     if (it.kind === 'lick' && !LICKS[d.lick]) err(w, 'unknown lick');
+    if (it.kind === 'move') {
+      const mv = moveBySpec(d);
+      if (!mv) err(w, 'no such move');
+      else if (d.variant && !mv.id.endsWith(':' + d.variant)) err(w, `variant ${d.variant} not generated`);
+    }
     if (it.kind === 'melody' && !MELODIES[d.melody]) err(w, 'unknown melody');
     if (it.kind === 'prog' && !PROGRESSIONS[d.prog]) err(w, 'unknown progression');
     if (it.kind === 'ear') {
@@ -187,5 +230,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error(`\n${errors.length} problem(s).`);
     process.exit(1);
   }
-  console.log(`✓ Content audit passed: ${Object.keys(SHAPES).length} shapes, 12 keys × ${Object.values(BARRES).reduce((a, b) => a + Object.keys(b).length - 1, 0)} barre forms, ${Object.keys(PICKS).length} picking patterns, ${Object.keys(PROGRESSIONS).length} progressions × ${FRIENDLY_KEYS.length} keys, ${Object.keys(LICKS).length + Object.keys(MELODIES).length} licks/melodies, ${ITEMS.length} items, ${MILESTONES.length} milestones.`);
+  console.log(`✓ Content audit passed: ${audit.moveCount} generated moves across 5 keys, ${Object.keys(SHAPES).length} shapes, 12 keys × ${Object.values(BARRES).reduce((a, b) => a + Object.keys(b).length - 1, 0)} barre forms, ${Object.keys(PICKS).length} picking patterns, ${Object.keys(PROGRESSIONS).length} progressions × ${FRIENDLY_KEYS.length} keys, ${Object.keys(LICKS).length + Object.keys(MELODIES).length} licks/melodies, ${ITEMS.length} items, ${MILESTONES.length} milestones.`);
 }

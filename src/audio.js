@@ -1,6 +1,6 @@
 // Sound: plucked-string synthesis (Karplus-Strong), metronome, drums, bass, loops and spoken prompts.
 import { fretMidi, midiToFreq, parseChord, CHORDS, SCALES, TUNING } from './theory.js';
-import { PICKS, STRUMS, roleStrings, shapeFor, SPARKLE } from './content.js';
+import { PICKS, STRUMS, roleStrings, shapeFor, SPARKLE, switchBass } from './content.js';
 
 let ctx = null;
 let master = null;
@@ -134,6 +134,12 @@ function noiseHit(when, { vel = 0.4, hp = 5000, len = 0.05 } = {}) {
   g.connect(master);
   src.start(when);
   src.stop(when + len + 0.02);
+}
+
+// Thumb slap on the strings: a muted thump plus string rattle.
+export function slap(when) {
+  noiseHit(when, { vel: 0.32, hp: 700, len: 0.07 });
+  kick(when, 0.25);
 }
 
 export function click(when, accent = false) {
@@ -312,11 +318,17 @@ export function pickSteps(chordSyms, patternId, { sparkle = false, barsPerChord 
         const sp = SPARKLE[sym];
         if (sparkle && sp && si >= perBar / 2) shape = shapeFor(sp[(ci + b) % sp.length]) || base;
         const roles = roleStrings(shape.frets);
-        const notes = slot.map((r) => ({ s: roles[r], f: shape.frets[roles[r]], role: r })).filter((n) => n.f >= 0);
+        const notes = slot
+          .map((r) => {
+            if (r === 'X') return { s: -1, f: -1, role: 'X', mute: true };
+            if (r === 'F') return { ...switchBass(shape.frets), role: 'F' };
+            return { s: roles[r], f: shape.frets[roles[r]], role: r };
+          })
+          .filter((n) => n.mute || n.f >= 0);
         if (melodyTop) {
           // Top-note melody: the high e note walks to neighbouring scale notes and back.
           const n = notes.find((x) => x.role === '1');
-          if (n) {
+          if (n && !n.mute) {
             const midi = scaleStep(fretMidi(n.s, n.f), keyPc, MELODY[(topCount + ci * 2) % MELODY.length]);
             const f = midi - TUNING[n.s];
             if (f >= 0 && f <= 7) n.f = f;
@@ -341,7 +353,11 @@ export function playPick(chordSyms, patternId, bpm, opts = {}) {
       loop: opts.loop !== false,
       onEnd: opts.onEnd,
       onStep: (i, t, d) => {
-        steps[i].notes.forEach((n) => pluck(fretMidi(n.s, n.f), t, { vel: n.role === 'B' || n.role === 'A' ? 0.62 : 0.5, bright: n.role === 'B' || n.role === 'A' ? 0.35 : 0.6 }));
+        steps[i].notes.forEach((n) => {
+          if (n.mute) return slap(t);
+          const bassy = n.role === 'B' || n.role === 'A' || n.role === 'F';
+          pluck(fretMidi(n.s, n.f), t, { vel: bassy ? 0.62 : 0.5, bright: bassy ? 0.35 : 0.6 });
+        });
         if (opts.click && steps[i].slot % stepsPerBeat === 0) click(t, steps[i].slot === 0);
       },
       onVisual: (i) => opts.onStep && opts.onStep(steps[i], i),
@@ -420,6 +436,38 @@ export function playTab(notes, bpm, opts = {}) {
         const e = byStep.get(i);
         if (e && opts.onNote) opts.onNote(e.idx);
       },
+    }),
+  );
+}
+
+// Play a move (from moves.js): events on an eighth-note grid, looping by default.
+export function playMove(move, bpm, { loop = true, onCol, click: withClick = false } = {}) {
+  const n = Math.round(move.beats * 2);
+  const byCol = new Map();
+  for (const e of move.events) {
+    const i = Math.round(e.t * 2);
+    if (!byCol.has(i)) byCol.set(i, []);
+    byCol.get(i).push(e);
+  }
+  const beat = 60 / bpm;
+  return own(
+    new Loop({
+      bpm,
+      stepsPerBeat: 2,
+      length: n,
+      loop,
+      onStep: (i, t) => {
+        if (withClick && i % 2 === 0) click(t, i % 8 === 0);
+        for (const e of byCol.get(i) || []) {
+          if (e.kind === 'note') pluck(fretMidi(e.s, e.f), t, { vel: e.tech ? 0.45 : 0.64, bright: e.s <= 2 ? 0.35 : 0.6, dur: e.dur * beat * 0.98 });
+          else if (e.kind === 'bass') {
+            const f = e.shape.frets[e.s];
+            if (f >= 0) pluck(fretMidi(e.s, f), t, { vel: 0.62, bright: 0.35 });
+          } else if (e.kind === 'treble') [3, 4, 5].forEach((s) => e.shape.frets[s] >= 0 && pluck(fretMidi(s, e.shape.frets[s]), t, { vel: 0.42, bright: 0.55 }));
+          else strumShape(e.shape.frets, t, { spread: 0.02, vel: 0.52 });
+        }
+      },
+      onVisual: (i) => onCol && onCol(i, byCol.get(i) || []),
     }),
   );
 }

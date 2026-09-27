@@ -22,9 +22,10 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'You'), h('p.muted', 'The path, the numbers, and the knobs.')),
+      h('div.stack', h('h1', 'You'), h('p.muted', 'The path, the numbers and the settings.')),
       pathSection(state, day),
       countdownSection(state, day),
+      h('section.sect', h('h2', 'Ear'), h('p.small.muted', 'Quizzes and the hands-free mode for walks and commutes.'), btn('Open ear training', () => ctx.go('ear'), { cls: 'quiet', ico: 'headphones', id: 'you-ear' })),
       historySection(state, day),
       recordingSection(ctx),
       songsSection(ctx),
@@ -41,9 +42,9 @@ function pathSection(state, day) {
   const goalIdx = MILESTONES.findIndex((m) => m.isGoal);
   const goalF = forecast(state, day, goalIdx);
   return h(
-    'section.card.stack',
+    'section.sect',
     { 'aria-label': 'Milestones' },
-    h('div.eyebrow', 'The path'),
+    h('h2', 'The path'),
     h('p.small', `Your goal, ${MILESTONES[goalIdx].name}: ${formatMinutes(goalF.totalMinutes)} of practice, about ${formatDuration(goalF.days)} at your pace.`),
     h(
       'div.stack',
@@ -51,7 +52,7 @@ function pathSection(state, day) {
         h(
           'div.ms',
           { class: (m.done ? 'done ' : '') + (i === cur && !m.done ? 'current ' : '') + (m.isGoal ? 'goal' : '') },
-          h('div.ms-mark', m.done ? icon('check', 16) : String(i + 1)),
+          h('div.ms-mark', m.done ? '✓' : String(i + 1).padStart(2, '0')),
           h('div', h('h3', m.name), h('p.small.muted', m.goal), h('div.mini-bar', h('span', { style: { width: (m.locked / m.total) * 100 + '%' } })), h('div.small.muted.mono', `${m.locked}/${m.total} locked in`)),
         ),
       ),
@@ -65,13 +66,13 @@ function countdownSection(state, day) {
   const f = lv.now;
   const guitarPace = pace.pace.hands + pace.pace.neck + pace.pace.create;
   return h(
-    'section.card.stack',
+    'section.sect',
     { 'aria-label': 'Countdown' },
-    h('div.eyebrow', 'Countdown to ' + f.milestone.name),
+    h('h2', 'Countdown'),
     h('p', `${formatMinutes(f.totalMinutes)} left, about ${formatDuration(f.days)}. Each track counts down separately; the slowest sets the date.`),
     trackBars(f),
     h('p.small.muted', pace.assumed ? `Pace: using the ${state.settings.dailyMins || 20} min a day you told me, until there are two weeks of real history.` : `Pace: ${Math.round(guitarPace)} min a day with the guitar and ${Math.round(pace.pace.ear)} min of ear work, averaged over the last ${pace.span} days.`),
-    h('div.eyebrow', 'Levers'),
+    h('h2', 'Levers'),
     h('div', lv.options.map((o) => h('div.lever', h('span', o.label), h('b', o.saved > 0.5 && isFinite(o.saved) ? formatDuration(o.days) + ' instead' : isFinite(f.days) ? 'no change' : formatDuration(o.days))))),
     h('p.small', h('b', 'The honest bit. '), 'Locking items in gets your hands ready. It won’t make you a songwriter on its own. That happens when you noodle with no app open, learn songs you love by ear, and play for people. The countdown only counts what the app can check.'),
     h('p.small.muted', `How it’s estimated: every item needs a measured number of reps to lock in (for example ${CAL.repsToLock.pick} for a picking pattern), plus review overhead, checked against a year of simulated practice by players like you. The median prediction was right on; half landed between two-thirds and one-and-a-half times the real time. Your own history replaces the assumptions after two weeks.`),
@@ -114,8 +115,8 @@ function historySection(state, day) {
   const st = streak(state, day);
   const total = data.reduce((a, b) => a + b.total, 0);
   return h(
-    'section.card.stack',
-    h('div.row.between', h('div.eyebrow', 'Last two weeks'), h('span.small.mono', `${Math.round(total)} min`)),
+    'section.sect',
+    h('div.row.between', h('h2', 'Last two weeks'), h('span.small.mono', `${Math.round(total)} min`)),
     chart,
     h('p.small.muted', `${st.last7} of the last 7 days. Streak ${st.streak}, and a single day off never breaks it. Minutes include practice you logged from elsewhere.`),
     h(
@@ -171,9 +172,9 @@ function recordingSection(ctx) {
   fileIn.addEventListener('change', () => fileIn.files[0] && save(fileIn.files[0]));
   uploadRow.append(btn('Attach a short video', () => fileIn.click(), { cls: 'quiet small', ico: 'mic' }), h('span.small.muted', 'Up to 20 MB, about 30 seconds.'), fileIn);
   return h(
-    'section.card.stack',
+    'section.sect',
     { 'aria-label': 'Weekly recording' },
-    h('div.row.between', h('div.eyebrow', 'Weekly recording'), dueRec ? h('span.pill.new', 'Due') : h('span.pill', `next in ${7 - (ctx.day - last.day)} days`)),
+    h('div.row.between', h('h2', 'Weekly recording'), dueRec ? h('span.pill.new', 'Due') : h('span.pill', `next in ${7 - (ctx.day - last.day)} days`)),
     h('p.small', 'Once a week, record one minute of anything: a song, a pattern, a noodle over your latest idea. Hearing week 1 next to week 8 is the best motivation there is.'),
     h('p.small.muted', 'Use your phone’s camera or voice memos. This page can’t reach the microphone, so it keeps the log and, where the file is small enough, the video.'),
     h('div.row.nowrap', h('div.grow', note), btn('Log it', () => save(null), { cls: 'primary', id: 'rec-log' })),
@@ -215,9 +216,9 @@ function songsSection(ctx) {
     }, { cls: 'primary', id: 'song-add' }),
   );
   return h(
-    'section.card.stack',
+    'section.sect',
     { 'aria-label': 'Repertoire' },
-    h('div.row.between', h('div.eyebrow', 'Repertoire'), btn('Add a song', () => (form.hidden = !form.hidden), { cls: 'quiet small', ico: 'plus', id: 'song-toggle' })),
+    h('div.row.between', h('h2', 'Repertoire'), btn('Add a song', () => (form.hidden = !form.hidden), { cls: 'quiet small', ico: 'plus', id: 'song-toggle' })),
     h('p.small.muted', 'Songs you already play come back on a spaced schedule, a quick run-through inside a session, so they don’t fade.'),
     form,
     songs.length
@@ -240,7 +241,7 @@ function songsSection(ctx) {
 }
 
 function aiSection(ctx) {
-  const sec = h('section.card.stack', { 'aria-label': 'AI extras', hidden: true });
+  const sec = h('section.sect', { 'aria-label': 'AI extras', hidden: true });
   getSample().then((s) => (sec.hidden = !s));
   // Coach
   const ask = h('textarea', { id: 'coach-text', placeholder: 'What felt hard lately? e.g. "my thumb speeds up when the fingers come in"', 'aria-label': 'What felt hard' });
@@ -298,7 +299,7 @@ function aiSection(ctx) {
     genB.disabled = false;
   }, { cls: 'quiet', ico: 'spark', id: 'lick-go' });
   sec.append(
-    h('div.eyebrow', 'AI extras'),
+    h('h2', 'AI extras'),
     h('h3', 'Practice coach'),
     h('p.small.muted', 'Tell it what felt hard. It can slow items down and point next week’s sessions at one track.'),
     ask,
@@ -337,7 +338,7 @@ function librarySection(ctx) {
       ),
     );
   });
-  return h('section.card.stack', { 'aria-label': 'Library' }, h('div.eyebrow', 'Library'), h('p.small.muted', 'Everything the app teaches. Practise anything out of order whenever you fancy it. It still counts.'), ...groups);
+  return h('section.sect', { 'aria-label': 'Library' }, h('h2', 'Library'), h('p.small.muted', 'Everything the app teaches. Practise anything out of order whenever you fancy it. It still counts.'), ...groups);
 }
 
 function settingsSection(ctx) {
@@ -376,9 +377,9 @@ function settingsSection(ctx) {
     );
   drawReset();
   return h(
-    'section.card.stack',
+    'section.sect',
     { 'aria-label': 'Settings' },
-    h('div.eyebrow', 'Settings'),
+    h('h2', 'Settings'),
     field('Theme', themeHolder),
     field('Typical day with the guitar', dailyHolder),
     h('div.row', btn(s.voice === false ? 'Spoken prompts: off' : 'Spoken prompts: on', () => {
