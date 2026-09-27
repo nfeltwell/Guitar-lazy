@@ -1,9 +1,9 @@
 // Pick lab: build a chord sequence, choose a pattern, watch which string to pick next. Save ideas.
 import { h, btn, seg, select, icon, toast, field, setBtn } from './dom.js';
 import { pickBox, tab, strumRow } from './fretboard.js';
-import { pickColumns } from './items.js';
+import { pickColumns, pieceView, cheatBlock } from './items.js';
 import * as A from '../audio.js';
-import { PICKS, STRUMS, PROGRESSIONS, SPARKLE, shapeFor, romanChord, progressionChords } from '../content.js';
+import { PICKS, STRUMS, PROGRESSIONS, SPARKLE, PIECES, shapeFor, romanChord, progressionChords } from '../content.js';
 import { DIATONIC_MAJOR, BORROWED, capoFor, pc, parseChord, prettyChord } from '../theory.js';
 
 const KEYS = ['C', 'G', 'D', 'A', 'E', 'F'];
@@ -22,8 +22,40 @@ function numeralOf(key, sym) {
   return null;
 }
 
+let view = 'loop';
+let pieceBpm = 66;
+
+function modeSeg(root, ctx) {
+  return seg([{ value: 'loop', label: 'Build a loop' }, { value: 'pieces', label: 'Fingerstyle pieces' }], view, (v) => {
+    A.stopAll();
+    view = v;
+    root.replaceChildren();
+    render(root, ctx);
+  }, { label: 'Pick lab mode', id: 'pick-mode', wide: true });
+}
+
+function renderPieces(root, ctx) {
+  const bpmLabel = h('span.mono', String(pieceBpm));
+  const list = h('div');
+  const views = [];
+  for (const [id, p] of Object.entries(PIECES)) {
+    const v = pieceView(p, { getBpm: () => pieceBpm });
+    views.push(v);
+    list.append(h('section.sect', { id: 'piece-' + id }, h('div.sect-head', h('h2', p.name), h('span.label', p.key + (p.scale === 'minor' ? ' minor' : ' major') + (p.meter === 3 ? ' · 3/4' : ''))), cheatBlock(p.technique, false), v));
+  }
+  root.append(
+    h(
+      'div.stack-lg',
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Short pieces, each built on one fingerpicking idea: let-it-ring arpeggios, shapes over open-string drones, crosspicking, hammer-ons, bass with a melody on top. The jangly, ringing sound of British indie guitar is mostly these tricks.')),
+      h('div.field', h('span.field-label', 'tempo'), h('div.row.nowrap', h('input', { type: 'range', min: 40, max: 120, step: 2, value: pieceBpm, id: 'piece-bpm', 'aria-label': 'Tempo', oninput: (e) => ((pieceBpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)), onchange: () => views.forEach((v) => v.restart()) }), bpmLabel)),
+      list,
+    ),
+  );
+}
+
 export function render(root, ctx) {
   if (!lab) initLab(ctx);
+  if (view === 'pieces') return renderPieces(root, ctx);
   let playing = false;
   const persist = () => ctx.update((s) => ({ ...s, settings: { ...s.settings, pickLab: { ...lab } } }));
   const isStrum = () => !!STRUMS[lab.pattern];
@@ -231,7 +263,7 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Pick lab'), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
       h('section.stack', h('div.label', 'key'), keyHolder, palette),
       h('section.sect', h('div.sect-head', h('h2', 'Your loop'), presetSel), progRow, suggest, capo),
       h('section.sect', h('div.fields', field('pattern', patternSel), field('tempo', h('div.row.nowrap', bpmInput, bpmLabel))), feel, h('div.row', sparkleB, melodyB)),

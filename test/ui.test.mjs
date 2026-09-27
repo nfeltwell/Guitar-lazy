@@ -146,7 +146,7 @@ test('pick lab: build a loop, play it, save it as an idea', { skip }, async () =
   await page.click('.chips >> nth=0 >> .chip >> nth=5'); // vi
   assert.equal(await page.locator('#prog-row .chip').count(), before + 1);
   await page.click('#lab-play');
-  await page.waitForSelector('.nk-hit', { timeout: 3000 });
+  await page.waitForSelector('.nk-ring', { timeout: 3000 });
   await page.screenshot({ path: join(SHOTS, 'pick-playing.png') });
   await page.click('#lab-play');
   await page.selectOption('#pattern', 'faithful');
@@ -179,6 +179,42 @@ test('moves: every connection plays, and one can be added to practice', { skip }
     assert.equal(Object.values(st.custom).filter((c) => c.kind === 'move').length, 1);
   }
   await page.screenshot({ path: join(SHOTS, 'moves-C-Am.png'), fullPage: true });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('neck: scale practice shows the order and steps through it', { skip }, async () => {
+  const { page, ctx, errors } = await open();
+  await page.click('#tab-neck');
+  await page.click('#sc-view button:has-text("Practise it")');
+  assert.match(await page.textContent('.readout'), /12 notes/);
+  await page.click('#st-step');
+  assert.match(await page.textContent('.readout'), /^1\/23/);
+  await page.click('#st-next');
+  assert.match(await page.textContent('.readout'), /^2\/23/);
+  assert.ok((await page.locator('.nk-ring').count()) >= 1, 'current note is ringed');
+  assert.ok((await page.locator('.nk-next').count()) >= 1, 'next note is marked');
+  await page.click('#st-pattern button:has-text("In 3s")');
+  await page.click('#st-play');
+  await page.waitForTimeout(300);
+  assert.match(await page.textContent('.readout'), /Count in|\d+\//);
+  await page.click('#st-play');
+  await noHorizontalScroll(page, 'scale trainer');
+  await page.screenshot({ path: join(SHOTS, 'scale-trainer.png'), fullPage: true });
+  assert.deepEqual(errors, []);
+  await ctx.close();
+});
+
+test('pick lab: fingerstyle pieces play with the string lit', { skip }, async () => {
+  const { page, ctx, errors } = await open();
+  await page.click('#tab-pick');
+  await page.click('#pick-mode button:has-text("Fingerstyle pieces")');
+  assert.ok((await page.locator('section[id^="piece-"]').count()) >= 8);
+  await page.click('#piece-drone button:has-text("Play")');
+  await page.waitForSelector('#piece-drone .nk-ring', { timeout: 3000 });
+  await page.screenshot({ path: join(SHOTS, 'pieces.png') });
+  await page.click('#piece-drone button:has-text("Stop")');
+  await noHorizontalScroll(page, 'pieces');
   assert.deepEqual(errors, []);
   await ctx.close();
 });

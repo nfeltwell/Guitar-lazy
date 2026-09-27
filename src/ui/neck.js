@@ -2,11 +2,12 @@
 import { h, btn, seg, select, field } from './dom.js';
 import { neck, chordBox, noteLabel, legend, degreeKind } from './fretboard.js';
 import { scaleKind } from './items.js';
+import { scaleTrainer } from './scaleTrainer.js';
 import * as A from '../audio.js';
 import { SCALES, CHORDS, pc, noteName, usesFlats, scalePosition, allScaleNotes, findVoicings, identifyChord, fretMidi, TUNING, prettyChord } from '../theory.js';
 import { SHAPES } from '../content.js';
 
-let ui = { mode: 'scales', key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
+let ui = { mode: 'scales', view: 'look', bpm: 70, key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
 const ROOTS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 const QUALS = ['', 'm', '7', 'maj7', 'm7', 'sus2', 'sus4', 'add9', '6', 'm6', '5', 'dim', 'aug', '7sus4', 'madd9', 'm7b5'];
 const PARENT = { majPent: 'major', minPent: 'minor', blues: 'minor' };
@@ -52,6 +53,29 @@ function scales(body) {
   const sc = SCALES[ui.scale];
   const nPos = sc.steps.length <= 6 ? 5 : 7;
   if (ui.pos >= nPos) ui.pos = -1;
+  const viewSeg = field('what to do', seg([{ value: 'look', label: 'Look at it' }, { value: 'practise', label: 'Practise it' }], ui.view, (v) => {
+    ui.view = v;
+    if (v === 'practise' && ui.pos < 0) ui.pos = 0;
+    rerender(body, scales);
+  }, { label: 'Look or practise', id: 'sc-view', wide: true }));
+  if (ui.view === 'practise') {
+    if (ui.pos < 0) ui.pos = 0;
+    const bpmLabel = h('span.mono', String(ui.bpm));
+    const slider = h('input', { type: 'range', min: 40, max: 160, step: 2, value: ui.bpm, id: 'sc-bpm', 'aria-label': 'Tempo', oninput: (e) => ((ui.bpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)) });
+    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => ui.bpm, onBpm: (b) => {
+      ui.bpm = b;
+      slider.value = b;
+      bpmLabel.textContent = String(b);
+    } });
+    body.append(
+      viewSeg,
+      h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
+      field('position', seg(Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) })), ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
+      field('tempo', h('div.row.nowrap', slider, bpmLabel)),
+      trainer,
+    );
+    return;
+  }
   const keyPc = pc(ui.key);
   const flats = usesFlats(ui.key) || ui.key.includes('b');
   const all = allScaleNotes(keyPc, ui.scale, 17);
@@ -70,13 +94,14 @@ function scales(body) {
   const posOpts = [{ value: -1, label: 'All' }, ...Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) }))];
   const span = box ? `frets ${Math.min(...box.map((n) => n.f))}–${Math.max(...box.map((n) => n.f))}` : 'every note, frets 0–17';
   body.append(
+    viewSeg,
     h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
     field('position', seg(posOpts, ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
     chordsHere.length ? field('show a chord inside the scale', seg([{ value: 'none', label: 'Scale' }, ...chordsHere.map((c) => ({ value: c.id, label: c.id }))], ui.overlay, (v) => ((ui.overlay = v), rerender(body, scales)), { label: 'Chord overlay', id: 'sc-ov', wide: true })) : null,
     h('div.row.between', h('span.label', `${ui.key} ${sc.name.toLowerCase()} · ${span}${ov ? ` · ${prettyChord(ov.sym)} lit` : ''}`), seg([{ value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], ui.labels, (v) => ((ui.labels = v), rerender(body, scales)), { label: 'Labels' })),
     legend(ui.scale === 'blues' && !ov ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
     h('div.nk-wrap', board),
-    box ? h('div.row', btn('Play this position', () => A.playTab([...box, ...box.slice(0, -1).reverse()].map((n) => [n.s, n.f, 0.5]), 96, {}), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap any dot to hear it. Pick a position to see one hand shape at a time; the others fade.'),
+    box ? h('div.row', btn('Practise this position', () => ((ui.view = 'practise'), rerender(body, scales)), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap any dot to hear it. Pick a position to see one hand shape at a time; the others fade. Then press Practise it.'),
     h(
       'p.small.muted',
       ui.scale === 'minPent'

@@ -1,328 +1,361 @@
 <title>Lazy Guitar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Kalam:wght@400;700&display=swap">
 <style>
-/* Lazy Guitar. Graphite hardware panel; notes coloured by function (root, 3rd, 5th, extension). */
+/* Lazy Guitar: a songwriter's notebook. Paper, pencil, a highlighter and a red pen.
+   Dark mode is chalk on slate. Note colours are coloured pencils: root red, 3rd yellow, 5th blue, extensions green. */
 :root {
-  --bg: #efefec;
-  --panel: #ffffff;
-  --panel-2: #e3e3df;
-  --line: #d2d2cd;
-  --line-strong: #151517;
-  --ink: #151517;
-  --ink-2: #56565b;
-  --ink-3: #7d7d82;
-  --primary: #151517;
-  --primary-ink: #f4f4f1;
-  --signal: #e8501a;
-  --good: #1d8349;
-  --warn: #a86c12;
-  --bad: #c2372b;
-  /* The neck is ebony in both themes. */
-  --wood: #1e1c1b;
-  --fret: #807d78;
-  --nut: #ebe6dc;
-  --string: #bdb7ad;
-  --n-root: #ff6a2b;
-  --n-third: #ffc53d;
-  --n-fifth: #58a8ff;
-  --n-ext: #c99cf0;
-  --n-scale: #e8e4dc;
-  --n-blue: #7ce0c3;
-  --n-text: #121214;
-  --display: 'Archivo', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
-  --body: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --tabbar: 62px;
-  --r: 5px;
+  --bg: #f3f0e7;
+  --card: #f8f6ef;
+  --ink: #23262d;
+  --ink-2: #4e525a;
+  --ink-3: #7b7e84;
+  --pencil: #8a8a86;
+  --pencil-dark: #3e4044;
+  --line: #bdb8aa;
+  --red: #c63b2f;
+  --hl: #ffe35a;
+  --hl-op: .8;
+  --hl-blend: multiply;
+  --note: #fff2a6;
+  --good: #2c7a45;
+  --warn: #a8711a;
+  --bad: #c63b2f;
+  --wash: rgba(90, 70, 40, .05);
+  --n-root: #dc4a31;
+  --n-third: #f2b62c;
+  --n-fifth: #4a7fd0;
+  --n-ext: #4da57b;
+  --n-scale: #fbf9f3;
+  --n-blue: #8a63cf;
+  --n-text: #1e1f23;
+  --grain: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .075 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --rule: var(--rule-l);
+  --hand: 'Kalam', 'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive;
+  --type: 'Courier Prime', 'Courier New', Courier, monospace;
+  --r1: 14px 5px 12px 6px / 6px 12px 5px 14px;
+  --r2: 6px 13px 5px 12px / 12px 5px 13px 6px;
+  --r3: 10px 4px 14px 5px / 4px 14px 6px 11px;
+  --tabbar: 64px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #111113;
-    --panel: #1a1a1d;
-    --panel-2: #252529;
-    --line: #2e2e33;
-    --line-strong: #ececea;
-    --ink: #ececea;
-    --ink-2: #a2a2a7;
-    --ink-3: #6f6f75;
-    --primary: #ececea;
-    --primary-ink: #111113;
-    --signal: #ff6a2b;
-    --good: #4cc47d;
-    --warn: #e5ad48;
-    --bad: #ff6a5d;
+    --bg: #1f2322;
+    --card: #252a28;
+    --ink: #ece7da;
+    --ink-2: #c0bbae;
+    --ink-3: #8f8e86;
+    --pencil: #7d807a;
+    --pencil-dark: #cdc8bb;
+    --line: #4b504d;
+    --red: #ff7d6a;
+    --hl: #e0c34f;
+    --hl-op: .38;
+    --hl-blend: normal;
+    --note: rgba(240, 214, 110, .13);
+    --good: #7ed39a;
+    --warn: #efc36a;
+    --bad: #ff7d6a;
+    --wash: rgba(255, 255, 255, .035);
+    --n-root: #ff7b5e;
+    --n-third: #f5cd5b;
+    --n-fifth: #83b3ff;
+    --n-ext: #82d6aa;
+    --n-scale: #2b302e;
+    --n-blue: #b99bff;
+    --n-text: #1b1d1c;
+    --grain: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 .95 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --rule: var(--rule-d);
   }
 }
 :root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #111113;
-  --panel: #1a1a1d;
-  --panel-2: #252529;
-  --line: #2e2e33;
-  --line-strong: #ececea;
-  --ink: #ececea;
-  --ink-2: #a2a2a7;
-  --ink-3: #6f6f75;
-  --primary: #ececea;
-  --primary-ink: #111113;
-  --signal: #ff6a2b;
-  --good: #4cc47d;
-  --warn: #e5ad48;
-  --bad: #ff6a5d;
+    color-scheme: dark;
+    --bg: #1f2322;
+    --card: #252a28;
+    --ink: #ece7da;
+    --ink-2: #c0bbae;
+    --ink-3: #8f8e86;
+    --pencil: #7d807a;
+    --pencil-dark: #cdc8bb;
+    --line: #4b504d;
+    --red: #ff7d6a;
+    --hl: #e0c34f;
+    --hl-op: .38;
+    --hl-blend: normal;
+    --note: rgba(240, 214, 110, .13);
+    --good: #7ed39a;
+    --warn: #efc36a;
+    --bad: #ff7d6a;
+    --wash: rgba(255, 255, 255, .035);
+    --n-root: #ff7b5e;
+    --n-third: #f5cd5b;
+    --n-fifth: #83b3ff;
+    --n-ext: #82d6aa;
+    --n-scale: #2b302e;
+    --n-blue: #b99bff;
+    --n-text: #1b1d1c;
+    --grain: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 .95 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --rule: var(--rule-d);
 }
 * { box-sizing: border-box; }
-html, body { background: var(--bg); }
-body { margin: 0; color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { background-color: var(--bg); }
+body { margin: 0; color: var(--ink); background-color: var(--bg); background-image: var(--grain); font-family: var(--type); font-size: 15.5px; line-height: 1.5; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 #app { max-width: 540px; margin: 0 auto; padding-inline: 16px; padding-block: 14px calc(var(--tabbar) + 28px + env(safe-area-inset-bottom, 0px)); }
-h1, h2, h3 { margin: 0; font-family: var(--display); text-wrap: balance; }
-h1 { font-size: 2.75rem; line-height: .9; font-weight: 800; font-stretch: 68%; text-transform: uppercase; letter-spacing: -.005em; }
-h2 { font-size: 1.6rem; line-height: .95; font-weight: 800; font-stretch: 72%; text-transform: uppercase; }
-h3 { font-size: 1.05rem; line-height: 1.25; font-weight: 700; }
+h1, h2, h3 { margin: 0; font-family: var(--hand); font-weight: 700; text-wrap: balance; line-height: 1.05; }
+h1 { font-size: 2.6rem; }
+h2 { font-size: 1.65rem; }
+h3 { font-size: 1.2rem; }
 p { margin: 0; }
 .muted { color: var(--ink-2); }
 .small { font-size: .88rem; }
-.label { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); font-weight: 500; }
-.eyebrow { font-family: var(--mono); font-size: .74rem; color: var(--ink-3); font-weight: 500; }
-.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.num { font-family: var(--display); font-weight: 800; font-stretch: 62%; font-variant-numeric: tabular-nums; line-height: .85; }
+.label, .eyebrow, .field-label { font-family: var(--hand); font-size: 1rem; color: var(--ink-3); font-weight: 400; line-height: 1.2; }
+.mono { font-family: var(--type); font-variant-numeric: tabular-nums; }
+.num { font-family: var(--hand); font-weight: 700; line-height: .9; }
 .stack { display: flex; flex-direction: column; gap: 12px; }
-.stack-lg { display: flex; flex-direction: column; gap: 22px; }
+.stack-lg { display: flex; flex-direction: column; gap: 24px; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .row.between { justify-content: space-between; }
 .row.nowrap { flex-wrap: nowrap; }
 .grow { flex: 1 1 auto; min-width: 0; }
-a { color: var(--ink); text-underline-offset: 3px; }
-:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+a { color: var(--ink); text-decoration-color: var(--red); text-underline-offset: 3px; }
+:focus-visible { outline: 2px dashed var(--red); outline-offset: 3px; }
+b, strong { font-weight: 700; }
 
-/* Sections are separated by a heavy rule, like a printed manual. No floating cards. */
-.sect { border-top: 2px solid var(--line-strong); padding-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+/* A pencil rule above each section instead of boxes. */
+.sect { background-image: var(--rule); background-repeat: no-repeat; background-size: 100% 7px; background-position: top left; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
 .sect-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
-.card.raised { background: var(--panel); }
-.card.tint, .card.warm { background: var(--panel-2); border-color: transparent; }
-.card.flat { background: var(--panel); }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; }
-hr.rule { border: 0; border-top: 1px solid var(--line); margin: 2px 0; width: 100%; }
+.panel, .card { border: 1.8px solid var(--ink); border-radius: var(--r1); padding: 14px; background: var(--card); }
+.card.tint, .card.warm { border-color: transparent; background: var(--note); }
+hr.rule { border: 0; height: 7px; background-image: var(--rule); background-size: 100% 7px; margin: 2px 0; width: 100%; }
 
-/* Buttons: flat keys with uppercase labels. */
-.btn { white-space: nowrap; appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 700 .86rem/1 var(--display); font-stretch: 85%; text-transform: uppercase; letter-spacing: .03em; min-height: 46px; padding: 0 14px; border-radius: var(--r); display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-.btn:active { transform: translateY(1px); }
+/* Buttons are boxes drawn in pen. The main action is highlighted. */
+.btn { white-space: nowrap; appearance: none; border: 1.8px solid var(--ink); border-radius: var(--r1); background: transparent; color: var(--ink); font: 700 1.08rem/1 var(--hand); min-height: 46px; padding: 2px 14px 0; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.btn:nth-child(2n) { border-radius: var(--r2); }
+.btn:active { transform: translate(1px, 1px); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
-.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
-.btn.quiet { background: var(--panel-2); border-color: transparent; }
-.btn.ghost { background: transparent; border-color: transparent; color: var(--ink-2); padding-inline: 6px; }
-.btn.small { min-height: 36px; padding: 0 10px; font-size: .76rem; }
+.btn.primary { background: var(--hl); color: #23262d; }
+.btn.quiet { border-width: 1.4px; border-color: var(--ink-2); }
+.btn.ghost { border-color: transparent; color: var(--ink-2); padding-inline: 6px; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+.btn.small { min-height: 36px; padding: 2px 10px 0; font-size: .95rem; }
 .btn.icon-only { width: 46px; padding: 0; }
 .btn.small.icon-only { width: 36px; }
-.btn.big { width: 100%; min-height: 62px; font-size: 1.15rem; font-stretch: 75%; letter-spacing: .06em; }
-.btn.on { background: var(--signal); border-color: var(--signal); color: #111; }
-.btn .icon { flex: none; }
+.btn.big { width: 100%; min-height: 62px; font-size: 1.5rem; border-width: 2.2px; border-radius: var(--r3); }
+.btn.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.icon { filter: url(#pencil-wobble); flex: none; }
 
-/* Segmented control: a row of keys. */
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; max-width: 100%; background: var(--panel); flex-wrap: wrap; }
-.seg button { appearance: none; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--ink-2); font: 600 .84rem var(--mono); min-height: 40px; padding: 0 12px; cursor: pointer; }
+/* Choices: circled in pencil, the chosen one highlighted. */
+.seg { display: inline-flex; border: 1.6px solid var(--ink); border-radius: var(--r2); overflow: hidden; max-width: 100%; flex-wrap: wrap; }
+.seg button { appearance: none; border: 0; border-right: 1.2px dashed var(--line); background: transparent; color: var(--ink-2); font: 700 1rem var(--hand); min-height: 40px; padding: 2px 12px 0; cursor: pointer; }
 .seg button:last-child { border-right: 0; }
-.seg button.on { background: var(--primary); color: var(--primary-ink); }
+.seg button.on { background: var(--hl); color: #23262d; }
 .seg.wide { display: flex; flex-wrap: nowrap; }
-.seg.wide button { flex: 1 1 0; min-width: 0; padding-inline: 4px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 700 1rem var(--display); font-stretch: 80%; min-height: 40px; padding: 0 11px; border-radius: var(--r); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.chip.on { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
-.chip.playing { outline: 2px solid var(--signal); outline-offset: 1px; }
-.chip .rn { font: 500 .7rem var(--mono); opacity: .7; }
+.seg.wide button { flex: 1 1 0; min-width: 0; padding-inline: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip { appearance: none; border: 1.5px solid var(--ink-2); border-radius: var(--r2); background: transparent; color: var(--ink); font: 700 1.15rem var(--hand); min-height: 40px; padding: 2px 11px 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.chip:nth-child(3n) { border-radius: var(--r1); }
+.chip:nth-child(3n + 1) { border-radius: var(--r3); }
+.chip.on { background: var(--hl); border-color: var(--ink); color: #23262d; }
+.chip.playing { box-shadow: 0 0 0 2.5px var(--red); }
+.chip .rn { font: 400 .78rem var(--type); opacity: .75; }
 .chip.borrowed { border-style: dashed; }
-.pill { display: inline-flex; align-items: center; gap: 4px; font: 500 .7rem var(--mono); padding: 3px 7px; border-radius: 3px; background: var(--panel-2); color: var(--ink-2); }
-.pill.new { background: var(--signal); color: #111; }
-.pill.locked { background: var(--good); color: #fff; }
-.pill.accent { background: transparent; border: 1px solid var(--line); }
-select, input[type="text"], textarea { font: 500 .95rem var(--body); color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); min-height: 44px; padding: 6px 10px; max-width: 100%; width: 100%; }
-textarea { min-height: 86px; resize: vertical; }
-.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.field-label { font: 500 .74rem var(--mono); color: var(--ink-3); }
-.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-input[type="range"] { width: 100%; accent-color: var(--signal); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font: 700 .95rem/1 var(--hand); padding: 4px 8px 2px; border: 1.3px solid var(--ink-3); border-radius: var(--r2); color: var(--ink-2); }
+.pill.new { color: var(--red); border-color: var(--red); }
+.pill.locked { color: var(--good); border-color: var(--good); }
+.pill.accent { border-style: dashed; }
+select, input[type="text"], textarea { font: 400 1.1rem var(--hand); color: var(--ink); background: transparent; border: 0; border-bottom: 1.8px solid var(--ink); border-radius: 0; min-height: 42px; padding: 4px 2px 2px; max-width: 100%; width: 100%; }
+textarea { min-height: 90px; resize: vertical; border: 1.6px solid var(--ink); border-radius: var(--r1); padding: 8px; }
+select option { background: var(--bg); color: var(--ink); }
+.field { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+input[type="range"] { width: 100%; accent-color: var(--red); }
 
 /* Tab bar */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--panel); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.tabbar nav { max-width: 540px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--tabbar); }
-.tabbar button { appearance: none; border: 0; border-top: 2px solid transparent; background: none; color: var(--ink-3); font: 600 .64rem var(--mono); text-transform: uppercase; letter-spacing: .04em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; min-width: 0; }
-.tabbar button[aria-current="page"] { color: var(--ink); border-top-color: var(--signal); }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background-color: var(--bg); background-image: var(--rule), var(--grain); background-repeat: no-repeat, repeat; background-size: 100% 7px, auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabbar nav { max-width: 540px; margin: 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); height: var(--tabbar); padding-top: 4px; }
+.tabbar button { appearance: none; border: 0; background: none; color: var(--ink-3); font: 700 .95rem/1 var(--hand); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; min-width: 0; }
+.tabbar button[aria-current="page"] { color: var(--red); }
+.tabbar button[aria-current="page"] span { background: linear-gradient(transparent 55%, var(--note) 55%); padding: 0 3px; }
 
 .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.sync { font: 500 .7rem var(--mono); color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
-.sync::before { content: ''; width: 7px; height: 7px; background: var(--ink-3); }
-.sync.synced::before { background: var(--good); }
-.sync.syncing::before { background: var(--warn); }
+.sync { font: 400 .95rem var(--hand); color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
+.sync::before { content: '○'; color: var(--ink-3); }
+.sync.synced::before { content: '✓'; color: var(--good); }
 
-/* Countdown */
+/* Countdown: pencil-hatched bars. */
 .countdown .num { font-size: 4.2rem; }
-.tracks { display: grid; gap: 8px; }
-.trk { display: grid; grid-template-columns: 7.6rem 1fr 4.4rem; gap: 10px; align-items: center; font-size: .86rem; }
-.trk .bar { height: 10px; background: var(--panel-2); position: relative; overflow: hidden; }
-.trk .bar > span { position: absolute; inset: 0 auto 0 0; background: var(--ink); }
-.trk.slowest .bar > span { background: var(--signal); }
-.trk.slowest .trk-name { font-weight: 700; }
+.tracks { display: grid; gap: 9px; }
+.trk { display: grid; grid-template-columns: 8.6rem 1fr 4.4rem; gap: 8px; align-items: center; font-size: .8rem; }
+.trk .bar { height: 13px; border: 1.4px solid var(--ink-2); border-radius: var(--r2); position: relative; overflow: hidden; }
+.trk .bar > span { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(-55deg, var(--ink-2) 0 1.6px, transparent 1.6px 4.5px); }
+.trk.slowest .bar { border-color: var(--red); }
+.trk.slowest .bar > span { background: repeating-linear-gradient(-55deg, var(--red) 0 1.8px, transparent 1.8px 4.5px); }
+.trk.slowest .trk-name { font-weight: 700; color: var(--red); }
 .trk .mono { font-size: .76rem; color: var(--ink-2); text-align: right; }
 
-/* The neck */
+/* The neck, in pencil */
 .nk-wrap { display: flex; justify-content: center; }
-.nk { display: block; height: auto; }
+.nk { display: block; height: auto; overflow: visible; }
 .nk-long { width: 100%; max-width: 330px; }
-.nk-box { width: 100%; max-width: 230px; }
-.nk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
-.nk-wood { fill: var(--wood); }
-.nk-fret { stroke: var(--fret); stroke-width: 2; }
-.nk-nut { stroke: var(--nut); stroke-width: 6; }
-.nk-string { stroke: var(--string); }
-.nk-string.on { stroke: var(--signal); stroke-width: 3.5; }
-.nk-inlay { fill: #5b5752; }
-.nk-num { fill: var(--ink-3); font: 600 11px var(--mono); }
-.nk-sname { fill: var(--ink-3); font: 600 10px var(--mono); }
-.nk-mute { fill: var(--ink-2); font: 700 15px var(--body); }
-.nk-dot circle { stroke: var(--wood); stroke-width: 2; }
-.nk-dot text { font: 700 12px var(--display); fill: var(--n-text); pointer-events: none; }
-.k-root circle, i.k-root { fill: var(--n-root); background: var(--n-root); }
-.k-third circle, i.k-third { fill: var(--n-third); background: var(--n-third); }
-.k-fifth circle, i.k-fifth { fill: var(--n-fifth); background: var(--n-fifth); }
-.k-ext circle, i.k-ext { fill: var(--n-ext); background: var(--n-ext); }
-.k-scale circle, i.k-scale { fill: var(--n-scale); background: var(--n-scale); }
-.k-blue circle, i.k-blue { fill: var(--n-blue); background: var(--n-blue); }
-.k-dim circle { fill: var(--n-scale); opacity: .22; }
-.k-dim text { fill: var(--n-scale) !important; opacity: .55; }
-i.k-dim { background: var(--n-scale); opacity: .3; }
-.k-ghost circle { fill: transparent; stroke: var(--n-scale); stroke-dasharray: 3 3; }
-.k-ghost text { fill: var(--n-scale); }
-.nk .nk-dot.open circle { fill: transparent; stroke-width: 3; }
-.nk .nk-dot.open.k-root circle { stroke: var(--n-root); }
-.nk .nk-dot.open.k-third circle { stroke: var(--n-third); }
-.nk .nk-dot.open.k-fifth circle { stroke: var(--n-fifth); }
-.nk .nk-dot.open.k-ext circle { stroke: var(--n-ext); }
-.nk .nk-dot.open.k-scale circle, .nk .nk-dot.open.k-dim circle { stroke: var(--ink-3); }
-.nk .nk-dot.open.k-blue circle { stroke: var(--n-blue); }
-.nk-hit { fill: none; stroke: var(--signal); stroke-width: 3; }
-.nk-pick-bg { fill: var(--signal); }
-.nk-pick { font: 700 14px var(--mono); fill: #111; }
+.nk-box { width: 100%; max-width: 240px; }
+.nk-wash { fill: var(--wash); }
+.nk-fret path { stroke: var(--pencil); stroke-width: 1.4; fill: none; stroke-linecap: round; }
+.nk-nut path { stroke: var(--ink); fill: none; stroke-linecap: round; }
+.nk-string path { stroke: var(--pencil-dark); fill: none; stroke-linecap: round; }
+.nk-fret .p2, .nk-string .p2, .nk-nut .p2 { opacity: .35; }
+.nk-string.on path { stroke: var(--red); }
+.nk-inlay { fill: none; stroke: var(--pencil); stroke-width: 1.2; }
+.nk-num, .nk-sname { font: 700 14px var(--hand); fill: var(--ink-3); }
+.nk-mute { stroke: var(--ink-2); stroke-width: 1.8; fill: none; stroke-linecap: round; }
+.nk-dot .fill { stroke: none; }
+.nk-dot .line { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; }
+.nk-dot text { font: 700 13.5px var(--hand); fill: var(--n-text); pointer-events: none; }
+.k-root .fill { fill: var(--n-root); }
+.k-third .fill { fill: var(--n-third); }
+.k-fifth .fill { fill: var(--n-fifth); }
+.k-ext .fill { fill: var(--n-ext); }
+.k-scale .fill { fill: var(--n-scale); }
+.k-blue .fill { fill: var(--n-blue); }
+.k-scale text { fill: var(--ink); }
+.k-dim .fill { fill: transparent; }
+.k-dim .line { stroke: var(--line); stroke-dasharray: 2 3; }
+.k-dim text { fill: var(--ink-3); }
+.k-ghost .fill { fill: transparent; }
+.k-ghost .line { stroke-dasharray: 3 3; }
+.k-ghost text { fill: var(--ink); }
+.nk-dot.open .line { stroke-width: 2.4; }
+.nk-dot.open.k-root .line { stroke: var(--n-root); }
+.nk-dot.open.k-third .line { stroke: var(--n-third); }
+.nk-dot.open.k-fifth .line { stroke: var(--n-fifth); }
+.nk-dot.open.k-ext .line { stroke: var(--n-ext); }
+.nk-dot.open.k-scale .line, .nk-dot.open.k-dim .line { stroke: var(--ink-3); }
+.nk-dot.open.k-blue .line { stroke: var(--n-blue); }
+.nk-hl-blob { fill: var(--hl); opacity: var(--hl-op); mix-blend-mode: var(--hl-blend); }
+.nk-ring { fill: none; stroke: var(--red); stroke-width: 2.3; stroke-linecap: round; }
+.nk-next { fill: none; stroke: var(--red); stroke-width: 1.4; stroke-dasharray: 3 3.5; opacity: .85; }
+.nk-pick { font: 700 18px var(--hand); fill: var(--red); }
 .nk-tap { fill: transparent; cursor: pointer; }
-.nk-tap:hover { fill: rgba(255, 255, 255, .06); }
-.pos-band { fill: var(--signal); opacity: .9; }
-.pos-label { font: 700 11px var(--mono); fill: var(--signal); }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 .74rem var(--mono); color: var(--ink-2); }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 400 .98rem var(--hand); color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
 
-/* Tab */
-.tab-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 4px; }
+/* Tab: typed numbers on pencil lines, the playhead is a highlighter swipe. */
+.tab-wrap { overflow-x: auto; border: 1.4px solid var(--ink-3); border-radius: var(--r2); padding: 6px 4px; background: var(--card); }
 .tab { display: block; height: auto; }
-.tab-line { stroke: var(--ink-3); stroke-width: .8; opacity: .55; }
-.tab-bar { stroke: var(--ink-2); stroke-width: 1; }
-.tab-str { fill: var(--ink-3); font: 600 9px var(--mono); }
-.tab-bg { fill: var(--panel); }
-.tab-num { fill: var(--ink); font: 600 11px var(--mono); }
-.tab-tech { fill: var(--signal); font: 700 8px var(--mono); }
-.tab-mark { fill: var(--ink-3); font: 600 8.5px var(--mono); }
-.tab-head { fill: var(--signal); opacity: .22; }
+.tab-line path { stroke: var(--pencil); stroke-width: .9; fill: none; }
+.tab-bar path { stroke: var(--ink-2); stroke-width: 1.1; fill: none; }
+.tab-str { fill: var(--ink-3); font: 700 10px var(--type); }
+.tab-bg { fill: var(--card); }
+.tab-num { fill: var(--ink); font: 700 12px var(--type); }
+.tab-tech { fill: var(--red); font: 700 11px var(--hand); }
+.tab-mark { fill: var(--ink-3); font: 400 9px var(--type); }
+.tab-head { fill: var(--hl); opacity: var(--hl-op); mix-blend-mode: var(--hl-blend); }
 
-.strum { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; }
-.strum-cell { display: flex; flex-direction: column; align-items: center; padding: 7px 0 5px; background: var(--panel-2); }
-.strum-cell.on { background: var(--signal); color: #111; }
-.strum-glyph { font: 700 1.2rem var(--display); line-height: 1; }
-.strum-count { font: 600 .64rem var(--mono); opacity: .75; }
+.strum { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; }
+.strum-cell { display: flex; flex-direction: column; align-items: center; padding: 6px 0 3px; border: 1.2px dashed var(--line); border-radius: var(--r2); }
+.strum-cell.on { background: var(--hl); border-color: var(--ink); color: #23262d; }
+.strum-glyph { font: 700 1.3rem var(--hand); line-height: 1; }
+.strum-count { font: 400 .7rem var(--type); opacity: .75; }
 .strum-cell.rest .strum-glyph { opacity: .3; }
-.strum-cell.chuck .strum-glyph { color: var(--bad); }
-.strum-cell.on.chuck .strum-glyph { color: inherit; }
+.strum-cell.chuck .strum-glyph { color: var(--red); }
 
 /* Session */
-.progress-dots { display: flex; gap: 3px; }
-.progress-dots span { flex: 1; height: 5px; background: var(--panel-2); }
-.progress-dots span.done { background: var(--ink); }
-.progress-dots span.cur { background: var(--signal); }
+.progress-dots { display: flex; gap: 4px; }
+.progress-dots span { flex: 1; height: 8px; border: 1.2px solid var(--ink-3); border-radius: var(--r2); }
+.progress-dots span.done { background: repeating-linear-gradient(-55deg, var(--ink-2) 0 1.5px, transparent 1.5px 3.5px); }
+.progress-dots span.cur { background: var(--hl); border-color: var(--ink); }
 .tempo { display: flex; align-items: center; gap: 12px; }
-.tempo .bpm { font: 800 2.9rem/0.85 var(--display); font-stretch: 62%; font-variant-numeric: tabular-nums; min-width: 2.6ch; text-align: center; }
-.tempo .target { font: 500 .72rem var(--mono); color: var(--ink-3); }
-.beat-dots { display: flex; gap: 5px; }
-.beat-dots span { width: 12px; height: 12px; background: var(--panel-2); }
+.tempo .bpm { font: 700 2.6rem/.9 var(--hand); font-variant-numeric: tabular-nums; min-width: 2.4ch; text-align: center; }
+.tempo .target { font: 400 .9rem var(--hand); color: var(--ink-3); }
+.beat-dots { display: flex; gap: 6px; }
+.beat-dots span { width: 12px; height: 12px; border: 1.4px solid var(--ink-2); border-radius: 50% 45% 50% 40%; }
 .beat-dots span.on { background: var(--ink); }
-.beat-dots span.on.first { background: var(--signal); }
-.rate { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.rate button { appearance: none; border: 1px solid var(--line); border-bottom-width: 5px; background: var(--panel); color: var(--ink); font: 800 1.05rem var(--display); font-stretch: 72%; text-transform: uppercase; letter-spacing: .03em; min-height: 64px; border-radius: var(--r); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px; }
-.rate button small { font: 500 .66rem var(--mono); text-transform: none; letter-spacing: 0; color: var(--ink-3); }
-.rate .r-clean { border-bottom-color: var(--good); }
-.rate .r-sloppy { border-bottom-color: var(--warn); }
-.rate .r-miss { border-bottom-color: var(--bad); }
-.rate button:active { transform: translateY(2px); }
-.cheat { background: var(--panel-2); border-radius: var(--r); padding: 14px; }
-.cheat .eyebrow { color: var(--signal); }
-details.cheat > summary { font-family: var(--display); font-weight: 700; }
-.chord-name { font: 800 2.2rem/0.9 var(--display); font-stretch: 70%; }
-.shape-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
-.shape-cell { appearance: none; font: inherit; color: inherit; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 6px 6px; display: flex; flex-direction: column; gap: 4px; cursor: default; }
-button.shape-cell { cursor: pointer; }
-.shape-cell.on { border-color: var(--signal); box-shadow: inset 0 0 0 1px var(--signal); }
+.beat-dots span.on.first { background: var(--red); border-color: var(--red); }
+.rate { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rate button { appearance: none; background: transparent; border: 2px solid var(--ink); color: var(--ink); font: 700 1.3rem/1 var(--hand); min-height: 66px; border-radius: var(--r1); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 4px 4px; }
+.rate button:nth-child(2) { border-radius: var(--r2); }
+.rate button:nth-child(3) { border-radius: var(--r3); }
+.rate button small { font: 400 .72rem var(--type); color: var(--ink-3); }
+.rate .r-clean { border-color: var(--good); color: var(--good); }
+.rate .r-sloppy { border-color: var(--warn); color: var(--warn); }
+.rate .r-miss { border-color: var(--bad); color: var(--bad); }
+.rate button:active { background: var(--note); }
+/* Cheat codes are sticky notes. */
+.cheat { background: var(--note); border-radius: 3px 3px 12px 3px; padding: 14px 15px; transform: rotate(-.4deg); box-shadow: 0 1px 0 rgba(0,0,0,.05); }
+.cheat .eyebrow { color: var(--red); }
+details.cheat > summary { font-family: var(--hand); font-weight: 700; font-size: 1.05rem; }
+.chord-name { font: 700 2.4rem/1 var(--hand); }
+.shape-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
 .shape-grid.compact { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; margin-top: 8px; }
-.shape-grid.compact .nm > span:first-child { font-size: 1.05rem; }
-details.shapes > summary { font-weight: 500; }
-.shape-cell .nm { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; padding-inline: 4px; }
-.shape-cell .nm > span:first-child { font: 800 1.25rem var(--display); font-stretch: 72%; }
-.shape-cell .nm .small { font: 500 .66rem var(--mono); color: var(--ink-3); }
-.quiz-q { font: 800 1.9rem/1 var(--display); font-stretch: 70%; text-transform: uppercase; }
-.answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 6px; }
-.answers .btn { text-transform: none; font-stretch: 90%; letter-spacing: 0; white-space: normal; min-height: 50px; line-height: 1.15; }
-.answers button.right { background: var(--good); color: #fff; border-color: var(--good); }
-.answers button.wrong { background: var(--bad); color: #fff; border-color: var(--bad); }
+.shape-cell { appearance: none; font: inherit; color: inherit; text-align: left; background: transparent; border: 1.3px dashed var(--line); border-radius: var(--r2); padding: 8px 4px 4px; display: flex; flex-direction: column; gap: 2px; }
+button.shape-cell { cursor: pointer; }
+.shape-cell.on { border: 2px solid var(--red); border-style: solid; }
+.shape-cell .nm { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; padding-inline: 6px; }
+.shape-cell .nm > span:first-child { font: 700 1.35rem var(--hand); }
+.shape-grid.compact .nm > span:first-child { font-size: 1.1rem; }
+.shape-cell .nm .small { font: 400 .85rem var(--hand); color: var(--ink-3); }
+.quiz-q { font: 700 1.9rem/1.05 var(--hand); }
+.answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.answers .btn { white-space: normal; min-height: 52px; line-height: 1.1; font-size: 1.05rem; }
+.answers button.right { border-color: var(--good); color: var(--good); background: var(--note); }
+.answers button.wrong { border-color: var(--bad); color: var(--bad); text-decoration: line-through; }
 
-.done-hero { display: flex; flex-direction: column; gap: 10px; padding-block: 28px 6px; }
-.done-hero h1 { font-size: 4rem; }
+.done-hero { display: flex; flex-direction: column; gap: 10px; padding-block: 30px 6px; }
+.done-hero h1 { font-size: 3.4rem; line-height: .98; }
+.done-hero h1 span { background: linear-gradient(transparent 58%, var(--note) 58%); }
 
 .list { display: flex; flex-direction: column; }
-.list > .li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.list > .li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1.2px dashed var(--line); }
 .list > .li:last-child { border-bottom: 0; }
-.ms { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding-block: 10px; border-bottom: 1px solid var(--line); }
+.ms { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding-block: 10px; border-bottom: 1.2px dashed var(--line); }
 .ms:last-child { border-bottom: 0; }
-.ms-mark { font: 800 1.6rem/1 var(--display); font-stretch: 62%; color: var(--ink-3); }
+.ms-mark { font: 700 1.5rem/1 var(--hand); color: var(--ink-3); }
 .ms.done .ms-mark { color: var(--good); }
-.ms.current .ms-mark { color: var(--signal); }
-.ms.goal h3::after { content: '  your goal'; font: 600 .66rem var(--mono); color: var(--signal); }
-.mini-bar { height: 4px; background: var(--panel-2); margin-top: 8px; }
-.mini-bar span { display: block; height: 100%; background: var(--ink); }
-.lever { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.ms.current .ms-mark { color: var(--red); }
+.ms.goal h3::after { content: '  ← your goal'; font: 400 1rem var(--hand); color: var(--red); }
+.mini-bar { height: 8px; border: 1.2px solid var(--ink-3); border-radius: var(--r2); margin-top: 8px; overflow: hidden; }
+.mini-bar span { display: block; height: 100%; background: repeating-linear-gradient(-55deg, var(--ink-2) 0 1.5px, transparent 1.5px 3.5px); }
+.lever { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; padding: 9px 0; border-bottom: 1.2px dashed var(--line); }
 .lever:last-child { border-bottom: 0; }
-.lever b { font-family: var(--mono); font-size: .8rem; white-space: nowrap; }
+.lever b { font-family: var(--hand); font-size: 1.05rem; white-space: nowrap; color: var(--good); }
 
 .current-chord { display: flex; align-items: baseline; gap: 12px; }
-.current-chord .now { font: 800 3.4rem/0.85 var(--display); font-stretch: 66%; }
-.current-chord .next { font: 500 .8rem var(--mono); color: var(--ink-3); }
-.hf-stage { padding: 20px 4px; display: flex; flex-direction: column; gap: 10px; }
-.hf-stage .said { font: 800 1.9rem/1 var(--display); font-stretch: 70%; text-transform: uppercase; min-height: 2em; }
+.current-chord .now { font: 700 3.2rem/1 var(--hand); }
+.current-chord .next { font: 400 1.05rem var(--hand); color: var(--ink-3); }
+.hf-stage { padding: 16px 2px; display: flex; flex-direction: column; gap: 10px; }
+.hf-stage .said { font: 700 1.9rem/1.1 var(--hand); min-height: 2.2em; }
 .ai-out { white-space: pre-wrap; font-size: .95rem; }
+.readout { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-height: 2.6rem; }
+.readout .big { font: 700 2rem/1 var(--hand); color: var(--red); }
+.readout span:last-child { font-size: .9rem; color: var(--ink-2); }
 
 /* Moves */
-.move { display: flex; flex-direction: column; gap: 10px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.move { display: flex; flex-direction: column; gap: 10px; padding-block: 16px; border-bottom: 1.2px dashed var(--line); }
 .move:last-child { border-bottom: 0; }
-.move-chain { font: 800 1.5rem/1 var(--display); font-stretch: 70%; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
-.move-chain .arrow { font: 500 .9rem var(--mono); color: var(--ink-3); }
-.move-chain .via { color: var(--signal); }
-.tag { font: 600 .66rem var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); border: 1px solid var(--line); padding: 2px 6px; border-radius: 3px; }
+.move-chain { font: 700 1.7rem/1.1 var(--hand); display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.move-chain .arrow { font-size: 1.1rem; color: var(--ink-3); }
+.move-chain .via { color: var(--red); }
+.tag { font: 400 .95rem/1 var(--hand); color: var(--ink-3); border: 1.2px solid var(--ink-3); padding: 4px 7px 2px; border-radius: var(--r2); }
 
 .hist { display: block; width: 100%; height: auto; }
-.hist-grid { stroke: var(--line); stroke-width: 1; }
-.hist-axis { fill: var(--ink-3); font: 600 9px var(--mono); }
-.hist-fill { fill: var(--ink); opacity: .8; }
-.hist-bar.today .hist-fill { fill: var(--signal); opacity: 1; }
+.hist-grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.hist-axis { fill: var(--ink-3); font: 400 11px var(--hand); }
+.hist-fill { fill: url(#hatch-ink); stroke: var(--ink-2); stroke-width: 1; }
+.hist-bar.today .hist-fill { fill: var(--hl); stroke: var(--ink); }
 .hist-hit { fill: transparent; }
-.hist-bar:hover .hist-fill { opacity: 1; }
 
-#toast { position: fixed; left: 50%; bottom: calc(var(--tabbar) + 16px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px); background: var(--primary); color: var(--primary-ink); padding: 11px 16px; border-radius: var(--r); font: 600 .84rem var(--mono); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 50; max-width: calc(100% - 32px); }
-#toast.show { opacity: 1; transform: translate(-50%, 0); }
-details > summary { cursor: pointer; font-weight: 700; list-style: none; }
+#toast { position: fixed; left: 50%; bottom: calc(var(--tabbar) + 16px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 14px) rotate(-1deg); background: var(--note); color: var(--ink); padding: 10px 16px 8px; border-radius: 3px 3px 12px 3px; font: 700 1.05rem var(--hand); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 50; max-width: calc(100% - 32px); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+#toast.show { opacity: 1; transform: translate(-50%, 0) rotate(-1deg); }
+details > summary { cursor: pointer; font-family: var(--hand); font-weight: 700; font-size: 1.05rem; list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
-details > summary::before { content: '+ '; font-family: var(--mono); color: var(--signal); }
+details > summary::before { content: '+ '; color: var(--red); }
 details[open] > summary::before { content: '− '; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 @media (max-width: 380px) {
-  h1 { font-size: 2.35rem; }
-  .trk { grid-template-columns: 6.2rem 1fr 4rem; }
+  h1 { font-size: 2.2rem; }
+  .trk { grid-template-columns: 7.4rem 1fr 4rem; font-size: .74rem; }
+  .tabbar button { font-size: .85rem; }
 }
 </style>
 <div id="app" aria-live="off"></div>
@@ -341,6 +374,7 @@ const { createStore } = __req("store.js");
 const { dayNumber } = __req("srs.js");
 const { h, clear, icon } = __req("ui/dom.js");
 const { stopAll } = __req("audio.js");
+const { ruleDataUri } = __req("ui/fretboard.js");
 const today = __req("ui/today.js");
 const session = __req("ui/session.js");
 const placement = __req("ui/placement.js");
@@ -368,6 +402,15 @@ function boot(mount) {
   const hash = (location.hash || '').slice(1);
   if (SCREENS[hash] && hash !== 'session') route = { name: hash, params: {} };
 
+  // Shared drawing bits: pencil rules for section breaks, a wobble filter for icons, pencil hatching.
+  document.documentElement.style.setProperty('--rule-l', ruleDataUri('#4e525a'));
+  document.documentElement.style.setProperty('--rule-d', ruleDataUri('#8f8e86'));
+  const defs = document.createElement('div');
+  defs.setAttribute('aria-hidden', 'true');
+  defs.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+  defs.innerHTML = '<svg width="0" height="0"><defs><filter id="pencil-wobble"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter><pattern id="hatch-ink" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.5"/></pattern></defs></svg>';
+  defs.style.color = 'var(--ink-2)';
+  document.body.append(defs);
   const main = h('main#main', { tabindex: -1 });
   const nav = h('nav', { 'aria-label': 'Sections' });
   const bar = h('div.tabbar', nav);
@@ -766,6 +809,8 @@ const PICKS = {
   slap: { name: 'Thumb slap', slots: [['B'], ['2', '1'], ['X'], ['2', '1'], ['A'], ['2', '1'], ['X'], ['2']], meter: 4, feel: 'Slap the strings with the side of your thumb on 2 and 4. The snare lives in your hand. Singer-songwriter percussive.' },
   sixTravis: { name: '6/8 Travis', slots: [['B'], ['2'], ['1'], ['A'], ['2'], ['1'], ['B'], ['2'], ['1'], ['A'], ['2'], ['1']], meter: 6, feel: 'Travis in two big beats per bar. Folk ballads and waltzy indie.' },
   boomChucka: { name: 'Boom-chucka', slots: [['B'], [], ['3', '2', '1'], ['3', '2', '1'], ['A'], [], ['3', '2', '1'], ['3', '2', '1']], meter: 4, feel: 'Bass, then a down-up flick with the fingers. Carter Family style, very driving.' },
+  crosspick: { name: 'Crosspicking roll', slots: [['B'], ['3'], ['2'], ['1'], ['3'], ['2'], ['1'], ['3']], meter: 4, feel: 'Three strings rolled in threes against a four-beat bar, so the accent keeps shifting. The chiming, jangly indie sound.' },
+  ringArp: { name: 'Ringing arpeggio', slots: [['B'], ['A'], ['3'], ['2'], ['1'], ['2'], ['3'], ['A']], meter: 4, feel: 'Up across five strings and back, letting every note ring into the next. Hold the chord down and don’t lift a finger.' },
   clawPinch: { name: 'Pinch & brush', slots: [['B', '1'], [], ['A'], ['3', '2', '1'], ['B'], ['2'], ['A'], ['3', '2', '1']], meter: 4, feel: 'Thumb bass with finger brushes. The singer-songwriter hybrid.' },
 };
 
@@ -856,6 +901,69 @@ const FRIENDLY_KEYS = ['G', 'C', 'D', 'A', 'E'];
 // ---------------------------------------------------------------------------
 // Licks and melodies as tab. n: [string(0=low E), fret, beats, technique?]
 // technique: h hammer-on, p pull-off, s slide into, b bend up a whole step.
+// ---------------------------------------------------------------------------
+// Fingerstyle pieces: short originals, each built on one technique. Bars are eighth notes.
+// Token: string letter + fret (E3, e0), '+' for notes together, '-' to let ring, h/p suffix for hammer/pull.
+const PIECES = {
+  ringing: {
+    name: 'Ringing arpeggios', key: 'G', scale: 'major', meter: 4, technique: 'letring',
+    about: 'Every note rings into the next, and the open B and e strings drone through all four chords. That shimmer is most of the sound of jangly 80s British indie.',
+    bars: [['Em', 'E0 D2 G0 B0 e0 B0 G0 D2'], ['Cmaj7', 'A3 D2 G0 B0 e0 B0 G0 D2'], ['G', 'E3 D0 G0 B0 e3 B0 G0 D0'], ['D/F♯', 'E2 D0 G2 B3 e0 B3 G2 D0']],
+  },
+  drone: {
+    name: 'Shapes over a drone', key: 'D', scale: 'major', meter: 4, technique: 'drone',
+    about: 'One small two-finger shape on the G and B strings slides up the neck while the open D and high e keep ringing underneath. Different chord, same drone. Johnny Marr built a style on tricks like this.',
+    bars: [['D', 'D0 G2+B3 e0 B3 D0 G2+B3 e0 G2'], ['Em/D', 'D0 G4+B5 e0 B5 D0 G4+B5 e0 G4'], ['G/D', 'D0 G7+B8 e0 B8 D0 G7+B8 e0 G7'], ['Dmaj7', 'D0 G6+B7 e0 B7 D0 G6+B7 e0 G6']],
+  },
+  crosspick: {
+    name: 'Crosspicking roll', key: 'C', scale: 'major', meter: 4, technique: 'crosspick',
+    about: 'The top three strings rolled in groups of three over a four-beat bar, so the pattern lands somewhere new each beat. Chiming and restless.',
+    bars: [['C', 'A3 G0 B1 e0 G0 B1 e0 G0'], ['Fmaj7', 'D3 G2 B1 e0 G2 B1 e0 G2'], ['Am', 'A0 G2 B1 e0 G2 B1 e0 G2'], ['G', 'E3 G0 B0 e3 G0 B0 e3 G0']],
+  },
+  hammer: {
+    name: 'Hammer-on arpeggios', key: 'A', scale: 'major', meter: 4, technique: 'legato',
+    about: 'Each arpeggio hides a hammer-on from the sus2 into the full chord. Pick once, let the fretting hand make the second note.',
+    bars: [['Asus2 → A', 'A0 D2 G2 B0 B2h e0 B2 G2'], ['Dadd9 → D', 'D0 G2 B3 e0 e2h B3 G2 B3'], ['E', 'E0 D2 G1 B0 e0 B0 G1 D2'], ['A', 'A0 D2 G2 B2 e0 B2 G2 D2']],
+  },
+  walking: {
+    name: 'Walking arpeggio', key: 'C', scale: 'major', meter: 4, technique: 'walks',
+    about: 'Arpeggios where the lowest note walks down a step each bar: C, B, A, G, F. The chords barely change shape; the bass does the storytelling.',
+    bars: [['C', 'A3 D2 G0 B1 e0 B1 G0 D2'], ['G/B', 'A2 D0 G0 B0 e3 B0 G0 D0'], ['Am', 'A0 D2 G2 B1 e0 B1 G2 D2'], ['Am/G', 'E3 D2 G2 B1 e0 B1 G2 D2'], ['Fmaj7', 'D3 G2 B1 e0 B1 G2 D3 G2'], ['G', 'E3 D0 G0 B0 e3 B0 G0 D0']],
+  },
+  pinchMelody: {
+    name: 'Bass and melody', key: 'G', scale: 'major', meter: 4, technique: 'topnote',
+    about: 'The thumb keeps the bass on the beat while the fingers play a tune on top, sometimes pinched together with the bass. This is what "fingerstyle arrangement" means.',
+    bars: [['G', 'E3+e3 - D0 B0 E3+e0 - D0+B3 -'], ['C', 'A3+e0 - D2 B1 A3+e3 - D2+B1 -'], ['D', 'D0+e2 - G2 B3 D0+e0 - G2+B3 -'], ['G', 'E3+B0 - D0 G0 E3+B0 - D0 -']],
+  },
+  waltz: {
+    name: 'Waltz arpeggio', key: 'D', scale: 'major', meter: 3, technique: 'letring',
+    about: 'Three beats to the bar, rising and falling. The last bar hides a hammer-on and pull-off on the top string.',
+    bars: [['D', 'D0 G2 B3 e2 B3 G2'], ['G', 'E3 D0 G0 B0 G0 D0'], ['A', 'A0 D2 G2 B2 G2 D2'], ['D', 'D0 G2 B3 e2 e3h e2p']],
+  },
+  shimmer: {
+    name: 'Open-string shimmer', key: 'A', scale: 'minor', meter: 4, technique: 'drone',
+    about: 'Minor chords made prettier by leaving strings open: A minor add9, F major 7 with a sharp 11, C add9, G6. The open B and e give every chord an extra colour.',
+    bars: [['Am add9', 'A0 D2 G2 B0 e0 B0 G2 D2'], ['Fmaj7♯11', 'D3 G2 B0 e0 B0 G2 D3 G2'], ['Cadd9', 'A3 D2 G0 B3 e0 B3 G0 D2'], ['G6', 'E3 D0 G0 B0 e0 B0 G0 D0']],
+  },
+};
+
+const STRING_OF = { E: 0, A: 1, D: 2, G: 3, B: 4, e: 5 };
+// Flatten a piece to eighth-note columns: [{notes:[{s,f,tech}], bar, chord, slot}]
+function pieceColumns(piece) {
+  const cols = [];
+  piece.bars.forEach(([chord, bar], bi) => {
+    bar.trim().split(/\s+/).forEach((tok, si) => {
+      const notes = tok === '-' ? [] : tok.split('+').map((t) => {
+        const m = /^([EADGBe])(\d+)([hps]?)$/.exec(t);
+        if (!m) throw new Error('Bad tab token ' + t);
+        return { s: STRING_OF[m[1]], f: Number(m[2]), tech: m[3] || undefined };
+      });
+      cols.push({ notes, bar: bi, chord, slot: si });
+    });
+  });
+  return cols;
+}
+
 const LICKS = {
   walkupGC: { name: 'Walk-up G to C', key: 'G', scale: 'major', n: [[0, 3, 1], [1, 0, 1], [1, 2, 1], [1, 3, 1]], use: 'Bass notes that lead from G to C. Drop it in on beat 4.' },
   walkdownCAm: { name: 'Walk-down C to Am', key: 'C', scale: 'major', n: [[1, 3, 1], [1, 2, 1], [1, 0, 2]], use: 'C, then B, then A. The classic songwriter move.' },
@@ -898,6 +1006,9 @@ const CHEATS = {
   pull: { title: 'Borrowed pull (secondary dominants)', body: 'Any chord can be approached by its own 5th chord with a 7th on it. Going to Am? Play E7 first. Going to Em? B7. That chord borrows one note from outside the key, a half step below the target, and it pulls like a magnet.', tip: 'Find the target, count up five letters, make it a 7th chord: Am → E7, C → G7, F → C7.' },
   cliche: { title: 'The line cliché', body: 'Hold a chord and move just one note inside it down a half step at a time: Am, Am(maj7), Am7, Am6. The rest of the chord stays. It sounds like a film soundtrack and your hand barely moves.', tip: 'On Am, only your ring finger on the G string moves: fret 2, fret 1, open.' },
   approach: { title: 'Approach notes', body: 'The note a half step below any root leans into it, even if it is not in the key. Play it on the last beat before the chord change and the change sounds deliberate.', tip: 'Going to Am? Play G# (6th string, fret 4) on beat 4.' },
+  letring: { title: 'Let it ring', body: 'Fingerpicking sounds pretty when notes overlap. Put the whole chord shape down before you pick, keep every finger down until the chord changes, and use open strings whenever you can. Pick one string at a time and let it sustain under the next.', tip: 'If a note stops early, a finger is leaning on the string next to it. Arch your fingers more.' },
+  drone: { title: 'Shapes over a drone', body: 'Keep one or two open strings ringing and move a small shape around above them. The open strings stay the same, so every new shape sounds related and shimmery. This is the heart of the jangly Johnny Marr and Smiths sound.', tip: 'In D: open D string and open e, with a two-finger shape on the G and B strings at frets 2-3, 4-5, 7-8.' },
+  crosspick: { title: 'Crosspicking', body: 'Roll across three strings in a repeating group of three (G, B, e, G, B, e…) while the bar counts in four. The pattern starts on a different string each beat, which makes it chime and ripple.', tip: 'Count "1 & 2 & 3 & 4 &" out loud and notice the G string lands on 1, then on the "&" of 2, then on 4.' },
   legato: { title: 'Hammer-ons and pull-offs', body: 'Pick once, then make a second note with the fretting hand alone: slam a finger down (hammer-on) or flick it off (pull-off). Smooth, pretty, and it frees the picking hand.', tip: 'Open D string, hammer onto fret 2. Pick once, hear two notes.' },
 };
 
@@ -990,6 +1101,17 @@ const ITEMS = [
   { id: 'lk-sparkleD', kind: 'lick', track: 'create', title: 'D sparkle hammer-on', cheat: 'legato', bpm: [60, 100], mins: 1, prereq: ['pk-travis'], data: { lick: 'sparkleD' } },
   { id: 'lk-hammerC', kind: 'lick', track: 'create', title: 'C hammer-on fill', bpm: [60, 100], mins: 1, prereq: ['lk-sparkleD'], data: { lick: 'hammerC' } },
   { id: 'ml-topnote', kind: 'pick', track: 'create', title: 'Top-note melody', cheat: 'topnote', bpm: [55, 85], mins: 2, prereq: ['pk-travis'], data: { pattern: 'pinch', chords: ['C', 'Cmaj7', 'Am', 'Am7'], melodyTop: true } },
+  // ---- Fingerstyle pieces
+  { id: 'pc-ringing', kind: 'piece', track: 'hands', title: 'Ringing arpeggios', cheat: 'letring', bpm: [50, 90], mins: 2, prereq: ['pk-arp'], data: { piece: 'ringing' } },
+  { id: 'pc-hammer', kind: 'piece', track: 'hands', title: 'Hammer-on arpeggios', bpm: [50, 88], mins: 2, prereq: ['pc-ringing'], data: { piece: 'hammer' } },
+  { id: 'pc-shimmer', kind: 'piece', track: 'hands', title: 'Open-string shimmer', bpm: [50, 88], mins: 2, prereq: ['pc-ringing'], data: { piece: 'shimmer' } },
+  { id: 'pc-walking', kind: 'piece', track: 'hands', title: 'Walking arpeggio', bpm: [50, 88], mins: 2, prereq: ['pc-ringing', 'lk-walkdown'], data: { piece: 'walking' } },
+  { id: 'pc-drone', kind: 'piece', track: 'hands', title: 'Shapes over a drone', cheat: 'drone', bpm: [50, 90], mins: 2, prereq: ['pc-ringing'], data: { piece: 'drone' } },
+  { id: 'pc-crosspick', kind: 'piece', track: 'hands', title: 'Crosspicking roll', cheat: 'crosspick', bpm: [50, 92], mins: 2, prereq: ['pc-ringing'], data: { piece: 'crosspick' } },
+  { id: 'pc-melody', kind: 'piece', track: 'hands', title: 'Bass and melody', bpm: [50, 85], mins: 2, prereq: ['pk-pinch'], data: { piece: 'pinchMelody' } },
+  { id: 'pc-waltz', kind: 'piece', track: 'hands', title: 'Waltz arpeggio', bpm: [60, 100], mins: 1.5, prereq: ['pc-hammer'], data: { piece: 'waltz' } },
+  { id: 'pk-crosspick', kind: 'pick', track: 'hands', title: 'Crosspicking pattern', bpm: [55, 95], mins: 1.5, prereq: ['pc-crosspick'], data: { pattern: 'crosspick', chords: ['G', 'Cadd9', 'Em7', 'Dsus4'] } },
+  { id: 'pk-ringarp', kind: 'pick', track: 'hands', title: 'Ringing arpeggio pattern', bpm: [55, 95], mins: 1.5, prereq: ['pc-ringing'], data: { pattern: 'ringArp', chords: ['Am', 'Fmaj7', 'C', 'G'] } },
   { id: 'ml-twinkle', kind: 'melody', track: 'create', title: 'Melody by ear: Twinkle', bpm: [60, 100], mins: 1.5, data: { melody: 'twinkle' } },
   { id: 'ml-ode', kind: 'melody', track: 'create', title: 'Melody by ear: Ode to Joy', bpm: [60, 100], mins: 1.5, prereq: ['ml-twinkle'], data: { melody: 'ode' } },
   { id: 'ml-grace', kind: 'melody', track: 'create', title: 'Melody by ear: Amazing Grace', bpm: [60, 95], mins: 1.5, prereq: ['ml-ode'], data: { melody: 'grace' } },
@@ -1040,19 +1162,19 @@ const MILESTONES = [
   },
   {
     id: 'm2', name: 'Pretty chords', goal: 'Sparkle chords, anchor fingers, A-shape barres and the capo trick. Every progression you play sounds like a record.',
-    items: ['pk-sparkle', 'st-anchor', 'ch-abarre', 'pk-forward', 'pk-jangle', 'st-push', 'pr-sad', 'pr-britpop', 'pr-capo', 'nt-a', 'ear-int2', 'ear-prog1', 'lk-sparkleD', 'ml-twinkle', 'pk-switch', 'pk-rolling', 'pr-anchor'],
+    items: ['pk-sparkle', 'st-anchor', 'ch-abarre', 'pk-forward', 'pk-jangle', 'st-push', 'pr-sad', 'pr-britpop', 'pr-capo', 'nt-a', 'ear-int2', 'ear-prog1', 'lk-sparkleD', 'ml-twinkle', 'pk-switch', 'pk-rolling', 'pr-anchor', 'pc-ringing', 'pc-hammer', 'pc-shimmer', 'pk-ringarp'],
   },
   {
     id: 'm2b', name: 'Smooth changes', goal: 'Walk the bass between chords, use slash chords and passing chords, and make every change sound deliberate instead of just switching shapes.',
-    items: ['mv-walk-GEm', 'mv-walk-CG', 'mv-walk-DG', 'mv-walkup-CAm', 'mv-inv-CAm', 'mv-inv-GC', 'mv-inv-CF', 'mv-sec-CAm', 'mv-sec-GEm', 'mv-appr-GAm', 'mv-sus-DG', 'mv-cliche-Am', 'mv-fill-GC', 'pk-boomchucka', 'pr-canon'],
+    items: ['mv-walk-GEm', 'mv-walk-CG', 'mv-walk-DG', 'mv-walkup-CAm', 'mv-inv-CAm', 'mv-inv-GC', 'mv-inv-CF', 'mv-sec-CAm', 'mv-sec-GEm', 'mv-appr-GAm', 'mv-sus-DG', 'mv-cliche-Am', 'mv-fill-GC', 'pk-boomchucka', 'pr-canon', 'pc-walking'],
   },
   {
     id: 'm3', name: 'Know the neck', goal: 'Find any note on strings 6 and 5, jump octaves, and play minor and major pentatonic boxes in five keys.',
-    items: ['nt-oct', 'sc-pent1', 'sc-pent2', 'sc-maj-pent', 'sc-major', 'lk-boxrun', 'pk-syncop', 'pk-updown', 'ch-mixbarre', 'ear-q2', 'ear-bass', 'ml-ode', 'pr-bitter'],
+    items: ['nt-oct', 'sc-pent1', 'sc-pent2', 'sc-maj-pent', 'sc-major', 'lk-boxrun', 'pk-syncop', 'pk-updown', 'ch-mixbarre', 'ear-q2', 'ear-bass', 'ml-ode', 'pr-bitter', 'pc-drone'],
   },
   {
     id: 'm4', name: 'Noodle & write', goal: 'Pick up the guitar and fingerpick your own progression with a melody on top, fills between chords, and one borrowed chord.', isGoal: true,
-    items: ['ml-topnote', 'lk-hammerC', 'lk-triplets', 'wr-loop', 'wr-melody', 'wr-fill', 'pr-creep', 'pr-royal', 'ml-grace', 'pk-hybrid', 'ear-prog2', 'ear-sing', 'lk-target', 'pk-slap', 'pk-pinchroll', 'mv-cliche-D', 'mv-sec-CF', 'mv-inv-GEm', 'mv-anchor-GC', 'pr-andalusian', 'pr-dream'],
+    items: ['ml-topnote', 'lk-hammerC', 'lk-triplets', 'wr-loop', 'wr-melody', 'wr-fill', 'pr-creep', 'pr-royal', 'ml-grace', 'pk-hybrid', 'ear-prog2', 'ear-sing', 'lk-target', 'pk-slap', 'pk-pinchroll', 'mv-cliche-D', 'mv-sec-CF', 'mv-inv-GEm', 'mv-anchor-GC', 'pr-andalusian', 'pr-dream', 'pc-melody', 'pc-crosspick', 'pk-crosspick', 'pc-waltz'],
   },
   {
     id: 'm5', name: 'Solo over a jam', goal: 'Improvise over a backing track in any key: three pentatonic boxes, bends, slides and landing on chord tones.',
@@ -1088,7 +1210,7 @@ function scaleKeysFriendly(scaleId) {
   return SCALES[scaleId].steps.length;
 }
 
-return { SHAPES, BARRES, barreShape, shapeFor, SPARKLE, PICKS, roleStrings, switchBass, STRUMS, PROGRESSIONS, romanChord, DIATONIC_ROMAN, progressionChords, FRIENDLY_KEYS, LICKS, MELODIES, CHEATS, TRACKS, ITEMS, ITEM_BY_ID, MILESTONES, PLACEMENT, scaleKeysFriendly };
+return { SHAPES, BARRES, barreShape, shapeFor, SPARKLE, PICKS, roleStrings, switchBass, STRUMS, PROGRESSIONS, romanChord, DIATONIC_ROMAN, progressionChords, FRIENDLY_KEYS, PIECES, pieceColumns, LICKS, MELODIES, CHEATS, TRACKS, ITEMS, ITEM_BY_ID, MILESTONES, PLACEMENT, scaleKeysFriendly };
 };
 __defs["theory.js"] = () => {
 // Music theory core: notes, scales, chords, the fretboard, voicing search.
@@ -1806,6 +1928,7 @@ function pluck(midi, when = now(), { vel = 0.7, dur = 0, bright = 0.55, glide = 
   src.connect(g);
   g.connect(dest || guitarBus);
   src.start(when);
+  src._gain = g;
   if (dur) {
     g.gain.setValueAtTime(vel, when + dur);
     g.gain.exponentialRampToValueAtTime(0.001, when + dur + 0.08);
@@ -2156,6 +2279,29 @@ function playTab(notes, bpm, opts = {}) {
   );
 }
 
+// Play a fingerstyle piece: notes ring until the same string is played again (like a real guitar).
+function playPiece(cols, bpm, { loop = true, onCol, click: withClick = false, meter = 4 } = {}) {
+  const last = new Array(6).fill(null);
+  return own(
+    new Loop({
+      bpm,
+      stepsPerBeat: 2,
+      length: cols.length,
+      loop,
+      onStep: (i, t) => {
+        if (withClick && i % 2 === 0) click(t, i % (meter * 2) === 0);
+        for (const n of cols[i].notes) {
+          const prev = last[n.s];
+          if (prev && prev._gain) prev._gain.gain.setTargetAtTime(0.0001, t, 0.015);
+          const soft = n.tech === 'h' || n.tech === 'p';
+          last[n.s] = pluck(fretMidi(n.s, n.f), t, { vel: soft ? 0.42 : n.s <= 2 ? 0.58 : 0.5, bright: n.s <= 2 ? 0.4 : 0.6 });
+        }
+      },
+      onVisual: (i) => onCol && onCol(i),
+    }),
+  );
+}
+
 // Play a move (from moves.js): events on an eighth-note grid, looping by default.
 function playMove(move, bpm, { loop = true, onCol, click: withClick = false } = {}) {
   const n = Math.round(move.beats * 2);
@@ -2343,7 +2489,311 @@ function sleep(ms, signal) {
   });
 }
 
-return { audioCtx, now, pluck, strumShape, slap, click, kick, snare, hat, bass, Loop, stopAll, metronome, scaleStep, pickSteps, playPick, strumSteps, playStrum, playTab, playMove, BACKING_STYLES, playBacking, playInterval, chordMidis, playChordQuality, playProgression, playChordOnce, speak, canSpeak, keepAwake, sleep };
+return { audioCtx, now, pluck, strumShape, slap, click, kick, snare, hat, bass, Loop, stopAll, own, metronome, scaleStep, pickSteps, playPick, strumSteps, playStrum, playTab, playPiece, playMove, BACKING_STYLES, playBacking, playInterval, chordMidis, playChordQuality, playProgression, playChordOnce, speak, canSpeak, keepAwake, sleep };
+};
+__defs["ui/fretboard.js"] = () => {
+// The neck, drawn by hand: pencil strings and frets with a slight wobble, coloured-pencil note dots.
+// Vertical like a chord book: nut at the top, low E on the left.
+// The wobble is seeded from each line's position, so the same drawing comes out the same every time.
+const { svg, h } = __req("ui/dom.js");
+const { fretMidi, noteName, parseChord } = __req("theory.js");
+const SG = 40; // string spacing
+const LEFT = 46; // room for fret numbers
+const RIGHT = 16;
+const OPEN = 28; // row above the nut for open/muted markers
+const INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
+const FINGER_ROW = 30;
+
+// ---------------------------------------------------------------------------
+// Sketch primitives
+function rng(seed) {
+  let s = (seed | 0) || 1;
+  return () => {
+    s ^= s << 13;
+    s ^= s >>> 17;
+    s ^= s << 5;
+    return ((s >>> 0) % 100000) / 100000;
+  };
+}
+const seedOf = (...n) => n.reduce((a, b) => (Math.imul(a, 31) + Math.round(b * 7)) | 0, 17);
+const f1 = (n) => n.toFixed(1);
+
+function wobblyPath(x1, y1, x2, y2, amp = 0.9, seed) {
+  const r = rng(seed ?? seedOf(x1, y1, x2, y2));
+  const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+  const segs = Math.max(1, Math.round(len / 70));
+  const nx = -(y2 - y1) / len;
+  const ny = (x2 - x1) / len;
+  let d = `M${f1(x1 + (r() - 0.5) * amp)},${f1(y1 + (r() - 0.5) * amp)}`;
+  for (let i = 1; i <= segs; i++) {
+    const t = i / segs;
+    const tm = (i - 0.5) / segs;
+    const off = (r() - 0.5) * 2 * amp;
+    const cx = x1 + (x2 - x1) * tm + nx * off;
+    const cy = y1 + (y2 - y1) * tm + ny * off;
+    const ex = x1 + (x2 - x1) * t + (r() - 0.5) * amp * 0.5;
+    const ey = y1 + (y2 - y1) * t + (r() - 0.5) * amp * 0.5;
+    d += ` Q${f1(cx)},${f1(cy)} ${f1(ex)},${f1(ey)}`;
+  }
+  return d;
+}
+
+// A pencil stroke: one firm pass plus a lighter second pass, slightly off.
+function pencil(x1, y1, x2, y2, cls, { amp = 0.9, width, second = true } = {}) {
+  const g = svg('g', { class: cls });
+  const seed = seedOf(x1, y1, x2, y2);
+  g.append(svg('path', { d: wobblyPath(x1, y1, x2, y2, amp, seed), 'stroke-width': width }));
+  if (second) g.append(svg('path', { d: wobblyPath(x1 + 0.4, y1 + 0.3, x2 - 0.3, y2 + 0.4, amp * 1.2, seed + 99), 'stroke-width': width ? width * 0.55 : undefined, class: 'p2' }));
+  return g;
+}
+
+// A hand-drawn circle: slightly lumpy, ends overlap a little like a real pen loop.
+function blobPath(cx, cy, r, seed, { open = false } = {}) {
+  const rand = rng(seed);
+  const n = 9;
+  const pts = [];
+  for (let i = 0; i <= n + (open ? 1 : 0); i++) {
+    const a = (i / n) * Math.PI * 2 + (rand() - 0.5) * 0.15 - 0.4;
+    const rr = r * (1 + (rand() - 0.5) * 0.12);
+    pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
+  }
+  let d = `M${f1((pts[0][0] + pts[1][0]) / 2)},${f1((pts[0][1] + pts[1][1]) / 2)}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const mx = (pts[i][0] + pts[i + 1][0]) / 2;
+    const my = (pts[i][1] + pts[i + 1][1]) / 2;
+    d += ` Q${f1(pts[i][0])},${f1(pts[i][1])} ${f1(mx)},${f1(my)}`;
+  }
+  return open ? d : d + 'Z';
+}
+
+function crossPath(cx, cy, r, seed) {
+  return wobblyPath(cx - r, cy - r, cx + r, cy + r, 0.8, seed) + ' ' + wobblyPath(cx + r, cy - r, cx - r, cy + r, 0.8, seed + 5);
+}
+
+// Colour class for a note relative to a chord (or key) root.
+function degreeKind(midi, rootPc, quality = '') {
+  const iv = (((midi - rootPc) % 12) + 12) % 12;
+  if (iv === 0) return 'root';
+  if (iv === 3 || iv === 4) return 'third';
+  if (iv === 7 || (iv === 6 && /dim|b5/.test(quality)) || (iv === 8 && quality === 'aug')) return 'fifth';
+  return 'ext';
+}
+
+// dots: [{s, f, label, kind: root|third|fifth|ext|scale|blue|dim|ghost}]
+function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretboard', fh = 38, pickRow = false, box = false, stringNames = true } = {}) {
+  const base = from === 0 ? 0 : from - 1;
+  const frets = to - base;
+  const top = OPEN;
+  const width = LEFT + SG * 5 + RIGHT;
+  const height = top + frets * fh + (pickRow ? FINGER_ROW + 6 : 8) + (stringNames && !box ? 16 : 0);
+  const x = (s) => LEFT + s * SG;
+  const yWire = (k) => top + (k - base) * fh;
+  const yCenter = (f) => (f === 0 ? top - OPEN / 2 + 2 : yWire(f) - fh / 2);
+  const bx0 = x(0) - SG / 2 + 6;
+  const bx1 = x(5) + SG / 2 - 6;
+  const root = svg('svg', { viewBox: `0 0 ${width} ${height}`, class: 'nk' + (box ? ' nk-box' : ' nk-long'), role: 'img', 'aria-label': label });
+  // a light pencil wash for the board, drawn as a slightly uneven quad
+  const wr = rng(seedOf(from, to, fh));
+  const j = () => (wr() - 0.5) * 2;
+  root.append(svg('path', { d: `M${f1(bx0 + j())},${top} L${f1(bx1 + j())},${top} L${f1(bx1 + j())},${f1(yWire(to) + j())} L${f1(bx0 + j())},${f1(yWire(to) + j())} Z`, class: 'nk-wash' }));
+  for (let f = Math.max(1, from); f <= to; f++) {
+    const cy = yCenter(f);
+    const inl = (cx) => svg('path', { d: blobPath(cx, cy, 3.4, seedOf(cx, cy)), class: 'nk-inlay' });
+    if (f % 12 === 0) root.append(inl(x(1.5)), inl(x(3.5)));
+    else if (INLAYS.includes(f)) root.append(inl(x(2.5)));
+  }
+  for (let k = base; k <= to; k++) {
+    if (k === 0) {
+      root.append(pencil(bx0 - 2, yWire(0) - 1.5, bx1 + 2, yWire(0) - 1.5, 'nk-nut', { width: 3.6, amp: 0.7 }));
+      root.append(pencil(bx0 - 1, yWire(0) + 2.5, bx1 + 1, yWire(0) + 2.5, 'nk-nut', { width: 1.4, amp: 0.7, second: false }));
+    } else root.append(pencil(bx0, yWire(k), bx1, yWire(k), 'nk-fret', { amp: 0.8 }));
+  }
+  for (let s = 0; s < 6; s++) {
+    const g = pencil(x(s), top - 1, x(s), yWire(to) + 2, 'nk-string', { width: 2.1 - s * 0.24, amp: 1.1 });
+    g.dataset.s = s;
+    root.append(g);
+  }
+  for (let f = Math.max(1, from); f <= to; f++)
+    if (f === from || INLAYS.includes(f) || f % 12 === 0) root.append(svg('text', { x: LEFT - SG / 2 - 4, y: yCenter(f) + 5, 'text-anchor': 'end', class: 'nk-num' }, String(f)));
+  for (const s of muted) root.append(svg('path', { d: crossPath(x(s), top - 13, 4.5, seedOf(s, 77)), class: 'nk-mute' }));
+  const hl = svg('g', { class: 'nk-hl' }); // highlighter goes under the dots
+  root.append(hl);
+  const dotLayer = svg('g');
+  for (const d of dots) {
+    if ((d.f < from && d.f !== 0) || d.f > to) continue;
+    const cx = x(d.s);
+    const cy = yCenter(d.f);
+    const seed = seedOf(d.s, d.f, cx);
+    const g = svg('g', { class: `nk-dot k-${d.kind || 'scale'}${d.f === 0 ? ' open' : ''}`, 'data-s': d.s, 'data-f': d.f });
+    const r = d.f === 0 ? 7.5 : Math.min(13.5, fh / 2 - 3.5);
+    if (d.f !== 0) g.append(svg('path', { d: blobPath(cx + 0.6, cy + 0.5, r - 0.4, seed + 3), class: 'fill' }));
+    g.append(svg('path', { d: blobPath(cx, cy, r, seed, { open: true }), class: 'line' }));
+    if (d.label != null && d.label !== '' && d.f !== 0) g.append(svg('text', { x: cx, y: cy + 5, 'text-anchor': 'middle' }, String(d.label)));
+    dotLayer.append(g);
+  }
+  root.append(dotLayer);
+  if (stringNames && !box) ['E', 'A', 'D', 'G', 'B', 'e'].forEach((n, s) => root.append(svg('text', { x: x(s), y: height - 3, 'text-anchor': 'middle', class: 'nk-sname' }, n)));
+  const rings = svg('g', { class: 'nk-rings' }); // red pen goes on top
+  root.append(rings);
+  const pickY = yWire(to) + FINGER_ROW / 2 + 8;
+  if (onTap) {
+    const taps = svg('g');
+    for (let s = 0; s < 6; s++)
+      for (let f = from === 0 ? 0 : from; f <= to; f++) {
+        const r = svg('rect', { x: x(s) - SG / 2, y: f === 0 ? 0 : yWire(f) - fh, width: SG, height: f === 0 ? OPEN : fh, class: 'nk-tap' });
+        r.addEventListener('click', () => onTap(s, f));
+        taps.append(r);
+      }
+    root.append(taps);
+  }
+  // Show what's being played: highlighter under the note, red pen ring around it,
+  // the string itself inked in, and the picking finger written underneath.
+  // Notes with next:true get a dashed pencil ring (what comes next).
+  root.highlight = (notes) => {
+    hl.replaceChildren();
+    rings.replaceChildren();
+    root.querySelectorAll('.nk-string.on').forEach((l) => l.classList.remove('on'));
+    for (const n of notes || []) {
+      if (n.s == null || n.s < 0) continue;
+      const cx = x(n.s);
+      const cy = yCenter(n.f);
+      const visible = !(n.f < from && n.f !== 0) && n.f <= to;
+      if (n.next) {
+        if (visible) rings.append(svg('path', { d: blobPath(cx, cy, Math.min(17, fh / 2), seedOf(cx, cy, 5), { open: true }), class: 'nk-next' }));
+        continue;
+      }
+      root.querySelector(`.nk-string[data-s="${n.s}"]`)?.classList.add('on');
+      if (visible) {
+        hl.append(svg('path', { d: blobPath(cx, cy, Math.min(19, fh / 2 + 2), seedOf(cx, cy, 1)), class: 'nk-hl-blob' }));
+        rings.append(svg('path', { d: blobPath(cx, cy, Math.min(17, fh / 2), seedOf(cx, cy, 2), { open: true }), class: 'nk-ring' }));
+      }
+      if (pickRow && n.label) {
+        hl.append(svg('path', { d: blobPath(cx, pickY - 3, 12, seedOf(cx, 9)), class: 'nk-hl-blob' }));
+        rings.append(svg('text', { x: cx, y: pickY + 3, 'text-anchor': 'middle', class: 'nk-pick' }, n.label));
+      }
+    }
+  };
+  return root;
+}
+
+function windowFor(frets) {
+  const fretted = frets.filter((f) => f > 0);
+  const max = fretted.length ? Math.max(...fretted) : 0;
+  const min = fretted.length ? Math.min(...fretted) : 0;
+  const from = max <= 4 ? 0 : min;
+  const to = from === 0 ? Math.max(4, max) : from + Math.max(3, max - min);
+  return { from, to };
+}
+
+function boxDots(shape, sym, labels) {
+  let c = null;
+  try {
+    c = parseChord(sym || shape.sym);
+  } catch {
+    c = null;
+  }
+  const dots = [];
+  const muted = [];
+  shape.frets.forEach((f, s) => {
+    if (f < 0) return muted.push(s);
+    const m = fretMidi(s, f);
+    const fi = shape.fingers ? shape.fingers[s] : 0;
+    const lab = labels === 'finger' ? (f > 0 && fi ? fi : '') : labels === 'note' ? noteName(m % 12) : '';
+    dots.push({ s, f, kind: c ? degreeKind(m, c.root, c.quality) : 'scale', label: lab });
+  });
+  return { dots, muted };
+}
+
+// A chord box: a short window of the neck with finger numbers and degree colours.
+function chordBox(shape, { sym, labels = 'finger', label } = {}) {
+  const { from, to } = windowFor(shape.frets);
+  const { dots, muted } = boxDots(shape, sym, labels);
+  return neck({ from, to, dots, muted, label: label || `${sym || shape.sym} chord`, fh: 40, box: true });
+}
+
+// Chord box with a pick row underneath, for "pick this, then this".
+function pickBox(shape, { sym } = {}) {
+  const { from, to } = windowFor(shape.frets);
+  const { dots, muted } = boxDots(shape, sym, 'finger');
+  return neck({ from, to, dots, muted, label: `${sym || shape.sym}: pick the lit string`, fh: 40, box: true, pickRow: true });
+}
+
+// Tab, typed like a tab sheet on pencil lines. columns: [{notes:[{s,f,tech}], mark}]
+function tab(columns, { label = 'Tab', beatEvery = 0 } = {}) {
+  const CW = 24;
+  const width = 22 + columns.length * CW + 10;
+  const height = 12 + 5 * 13 + 16;
+  const root = svg('svg', { viewBox: `0 0 ${width} ${height}`, class: 'tab', role: 'img', 'aria-label': label, width: Math.max(width, 200) });
+  const y = (s) => 12 + (5 - s) * 13;
+  const head = svg('path', { d: '', class: 'tab-head' });
+  ['e', 'B', 'G', 'D', 'A', 'E'].forEach((n, i) => {
+    root.append(svg('text', { x: 3, y: 12 + i * 13 + 4, class: 'tab-str' }, n));
+    root.append(pencil(16, 12 + i * 13, width - 4, 12 + i * 13, 'tab-line', { amp: 0.6, second: false }));
+  });
+  columns.forEach((col, i) => {
+    const cx = 22 + i * CW + CW / 2;
+    if (beatEvery && i % beatEvery === 0 && i > 0) root.append(pencil(cx - CW / 2, 11, cx - CW / 2, 12 + 5 * 13 + 1, 'tab-bar', { amp: 0.5, second: false }));
+    for (const n of col.notes) {
+      root.append(svg('rect', { x: cx - 7.5, y: y(n.s) - 6, width: 15, height: 12, class: 'tab-bg' }));
+      root.append(svg('text', { x: cx, y: y(n.s) + 4, 'text-anchor': 'middle', class: 'tab-num' }, String(n.f)));
+      if (n.tech) root.append(svg('text', { x: cx - 10, y: y(n.s) - 6, class: 'tab-tech' }, n.tech));
+    }
+    if (col.mark) root.append(svg('text', { x: cx, y: height - 2, 'text-anchor': 'middle', class: 'tab-mark' }, col.mark));
+  });
+  root.append(head); // on top, blended like a real highlighter over ink
+  // The playhead is a highlighter swipe over the column.
+  root.playhead = (i) => {
+    if (i == null || i < 0) return head.setAttribute('d', '');
+    const x0 = 22 + i * CW + 1;
+    const r = rng(i + 3);
+    const w = CW - 2;
+    const b = 12 + 5 * 13 + 6;
+    head.setAttribute('d', `M${f1(x0 + r() * 2)},${f1(4 + r() * 2)} L${f1(x0 + w - r() * 2)},${f1(3 + r() * 2)} L${f1(x0 + w - r() * 2)},${f1(b - r() * 2)} L${f1(x0 + r() * 2)},${f1(b + r())} Z`);
+  };
+  return root;
+}
+
+// Strum pattern row: hand-drawn arrows over counts.
+function strumRow(slots, { label = 'Strum pattern' } = {}) {
+  const n = slots.length;
+  const counts = n === 16 ? ['1', 'e', '&', 'a', '2', 'e', '&', 'a', '3', 'e', '&', 'a', '4', 'e', '&', 'a'] : n === 6 ? ['1', '&', 'a', '2', '&', 'a'] : ['1', '&', '2', '&', '3', '&', '4', '&'];
+  const row = h('div.strum', { role: 'img', 'aria-label': label + ': ' + slots.split('').join(' ') });
+  [...slots].forEach((c, i) => {
+    const glyph = c === 'D' ? '↓' : c === 'U' ? '↑' : c === 'X' ? '×' : '·';
+    row.append(h('div.strum-cell', { 'data-i': i, class: c === '.' ? 'rest' : c === 'X' ? 'chuck' : '' }, h('span.strum-glyph', glyph), h('span.strum-count', counts[i] || '')));
+  });
+  row.playhead = (i) => {
+    row.querySelectorAll('.strum-cell.on').forEach((x) => x.classList.remove('on'));
+    if (i != null && i >= 0) row.querySelector(`[data-i="${i}"]`)?.classList.add('on');
+  };
+  return row;
+}
+
+function noteLabel(s, f, flats) {
+  return noteName(fretMidi(s, f) % 12, flats);
+}
+
+// Legend for the note colours, drawn as little pencil dots.
+function legend(kinds = ['root', 'third', 'fifth', 'ext']) {
+  const names = { root: 'root', third: '3rd', fifth: '5th', ext: '7th, 6th, 9th, sus', scale: 'other scale note', blue: 'blue note', dim: 'other positions' };
+  return h(
+    'div.legend',
+    kinds.map((k) => {
+      const dot = svg('svg', { viewBox: '0 0 16 16', width: 14, height: 14, class: 'nk-dot k-' + k, 'aria-hidden': 'true' });
+      dot.append(svg('path', { d: blobPath(8.3, 8.3, 5.6, seedOf(k.length, 3)), class: 'fill' }), svg('path', { d: blobPath(8, 8, 6, seedOf(k.length, 4), { open: true }), class: 'line' }));
+      return h('span', dot, names[k]);
+    }),
+  );
+}
+
+// A hand-drawn rule as a CSS background (used between sections).
+function ruleDataUri(color) {
+  const d = wobblyPath(1, 3, 399, 3.5, 1.4, 4242);
+  const svgText = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 7' preserveAspectRatio='none'><path d='${d}' fill='none' stroke='${color}' stroke-width='1.6' stroke-linecap='round'/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svgText)}")`;
+}
+
+return { wobblyPath, pencil, blobPath, degreeKind, neck, chordBox, pickBox, tab, strumRow, noteLabel, legend, ruleDataUri };
 };
 __defs["ui/today.js"] = () => {
 // Today: one tap to start. Countdown to the next milestone, the slowest track called out.
@@ -2810,20 +3260,21 @@ __defs["calibration.js"] = () => {
 // Generated by sim/simulate.mjs. Do not edit by hand; run `npm run sim -- --write` to regenerate.
 const CAL = {
   "repsToLock": {
-    "pick": 18.3,
+    "pick": 18.2,
     "strum": 12.9,
-    "barre": 18,
-    "scale": 16.7,
-    "notes": 14.5,
+    "barre": 18.3,
+    "scale": 16.9,
+    "notes": 14.4,
     "lick": 14.8,
-    "melody": 14.9,
+    "melody": 15,
     "prog": 12.7,
-    "write": 16.3,
-    "ear": 18.5,
+    "write": 16.5,
+    "ear": 18.3,
+    "piece": 18.1,
     "move": 15.5
   },
-  "overhead": 1.33,
-  "fudge": 2.99,
+  "overhead": 1.31,
+  "fudge": 2.94,
   "generated": "2026-09-27",
   "forecastMedianRatio": 1
 };
@@ -2943,7 +3394,7 @@ function renderDone(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.done-hero', h('div.label', 'session complete'), h('h1', 'Done. Go live your life.'), h('p.mono.small.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
+      h('div.done-hero', h('div.label', 'session complete'), h('h1', 'Done. ', h('span', 'Go live your life.')), h('p.mono.small.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
       h('section.sect', ...lines, h('p.small.muted', honest)),
       h('div.row', btn('Back to today', () => {
         session = null;
@@ -2968,7 +3419,8 @@ const { h, btn, icon, seg, toast, setBtn } = __req("ui/dom.js");
 const { neck, chordBox, pickBox, tab, strumRow, noteLabel, legend, degreeKind } = __req("ui/fretboard.js");
 const { moveBySpec, moveColumns, moveShapes, plainChange, MOVE_TYPES } = __req("moves.js");
 const A = __req("audio.js");
-const { CHEATS, PICKS, STRUMS, LICKS, MELODIES, PROGRESSIONS, TRACKS, shapeFor, barreShape, progressionChords, romanChord, SPARKLE } = __req("content.js");
+const { CHEATS, PICKS, STRUMS, LICKS, MELODIES, PROGRESSIONS, TRACKS, PIECES, pieceColumns, shapeFor, barreShape, progressionChords, romanChord, SPARKLE } = __req("content.js");
+const { scaleTrainer } = __req("ui/scaleTrainer.js");
 const { pc, noteName, usesFlats, scalePosition, SCALES, INTERVALS, CHORDS, capoFor, transposeSym, fretMidi, TUNING, parseChord, prettyChord } = __req("theory.js");
 const { hasTempo, isLocked, ratingFromScore } = __req("srs.js");
 const { explainHarmony, getSample, aiErrorText } = __req("ai.js");
@@ -3009,6 +3461,65 @@ function pickColumns(steps) {
     notes: s.notes.flatMap((n) => (n.mute ? [3, 4, 5].map((st) => ({ s: st, f: 'x' })) : [{ s: n.s, f: n.f }])),
     mark: s.slot % 2 === 0 ? String(s.slot / 2 + 1) : '&',
   }));
+}
+
+// A fingerstyle piece: follow the lit string and the finger under it, with the tab below.
+const PIMA = ['p', 'p', 'p', 'i', 'm', 'a'];
+function pieceView(p, { getBpm = () => 70 } = {}) {
+  const cols = pieceColumns(p);
+  const per = p.meter === 3 ? 6 : 8;
+  const now = h('span.now', p.bars[0][0]);
+  const next = h('span.next', p.bars.length > 1 ? 'next ' + p.bars[1][0] : '');
+  const wrap = h('div.nk-wrap');
+  const keyPc = pc(p.key);
+  let board = null;
+  let curBar = -1;
+  const showBar = (bi) => {
+    if (bi === curBar) return;
+    curBar = bi;
+    const notes = cols.filter((c) => c.bar === bi).flatMap((c) => c.notes);
+    const fr = notes.map((n) => n.f).filter((f) => f > 0);
+    const hi = fr.length ? Math.max(...fr) : 0;
+    const lo = fr.length ? Math.min(...fr) : 0;
+    const from = hi <= 4 ? 0 : lo;
+    const to = from === 0 ? Math.max(4, hi) : from + Math.max(3, hi - lo);
+    const uniq = new Map(notes.map((n) => [n.s + ':' + n.f, n]));
+    board = neck({ from, to, dots: [...uniq.values()].map((n) => ({ s: n.s, f: n.f, kind: scaleDegreeKind(fretMidi(n.s, n.f), keyPc, p.scale), label: '' })), fh: 40, box: true, pickRow: true, label: p.name + ', bar ' + (bi + 1) });
+    wrap.replaceChildren(board);
+    now.textContent = p.bars[bi][0];
+    next.textContent = p.bars.length > 1 ? 'next ' + p.bars[(bi + 1) % p.bars.length][0] : '';
+  };
+  showBar(0);
+  const t = tab(cols.map((c) => ({ notes: c.notes.map((n) => ({ s: n.s, f: n.f, tech: n.tech })), mark: c.slot % 2 === 0 ? String(c.slot / 2 + 1) : '&' })), { beatEvery: per, label: p.name + ' tab' });
+  let playing = false;
+  const playB = btn('Play', () => (playing ? stop() : play()), { cls: 'primary', ico: 'play' });
+  function play() {
+    A.stopAll();
+    playing = true;
+    playB.classList.add('on');
+    setBtn(playB, 'Stop', 'stop');
+    A.playPiece(cols, getBpm(), {
+      meter: p.meter,
+      click: false,
+      onCol: (i) => {
+        const c = cols[i];
+        showBar(c.bar);
+        board.highlight(c.notes.map((n) => ({ s: n.s, f: n.f, label: PIMA[n.s] })));
+        t.playhead(i);
+      },
+    });
+  }
+  function stop() {
+    A.stopAll();
+    playing = false;
+    playB.classList.remove('on');
+    setBtn(playB, 'Play', 'play');
+    t.playhead(-1);
+  }
+  const el = h('div.stack', h('p', p.about), h('div.current-chord', now, next), wrap, h('div.tab-wrap', t), h('div.row', playB), h('p.small.muted', 'Thumb (p) takes the three bass strings; index, middle and ring (i, m, a) take G, B and e. Hold each chord shape down so everything rings.'));
+  el.restart = () => playing && play();
+  el.stop = stop;
+  return el;
 }
 
 // A move: the chord chain, why it works, tab, chord boxes, play and compare.
@@ -3089,6 +3600,10 @@ function tempoBox(item, st, onChange) {
     dots.querySelectorAll('span').forEach((d, j) => d.classList.toggle('on', j === i % 4));
   };
   box.get = () => bpm;
+  box.show = (b) => {
+    bpm = b;
+    val.textContent = String(b);
+  };
   return box;
 }
 
@@ -3301,56 +3816,35 @@ const RENDER = {
   scale(body, item, st, v, api) {
     const d = item.data;
     const key = v.key || d.keys[0];
-    const notes = scalePosition(pc(key), d.scale, d.position);
-    const fs = notes.map((n) => n.f);
-    const from = Math.max(0, Math.min(...fs) - 1);
-    const to = Math.max(from + 5, Math.max(...fs) + 1);
-    let labels = 'degree';
     let bpm = st ? st.bpm : item.bpm[0];
-    const wrap = h('div.nk-wrap');
-    const flats = usesFlats(key);
-    const draw = () => {
-      const b = neck({
-        from: from === 0 ? 0 : from,
-        to,
-        dots: notes.map((n) => ({ s: n.s, f: n.f, kind: scaleKind(n.degree), label: labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats) })),
-        label: `${key} ${SCALES[d.scale].name} position ${d.position + 1}`,
-      });
-      wrap.replaceChildren(b);
-      return b;
-    };
-    let board = draw();
-    const run = [...notes, ...notes.slice(0, -1).reverse()].map((n) => [n.s, n.f, 0.5]);
+    const minorish = ['minPent', 'blues', 'minor', 'dorian'].includes(d.scale);
     const tempo = tempoBox(item, st, (b) => {
       bpm = b;
       api.setBpm(b);
-      tr.restart();
     });
-    const tr = transport({
-      onPlay: () => A.playTab(run, bpm, { loop: true, click: true, onNote: (i) => board.highlight([{ s: run[i][0], f: run[i][1] }]) }),
-      onMetro: () => A.metronome(bpm, 4, (i) => tempo.beat(i)),
-    });
-    const labelSeg = h('div');
-    const drawSeg = () =>
-      labelSeg.replaceChildren(
-        seg([{ value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], labels, (x) => {
-          labels = x;
-          board = draw();
-          drawSeg();
-        }, { label: 'Labels' }),
-      );
-    drawSeg();
-    const minorish = ['minPent', 'blues', 'minor', 'dorian'].includes(d.scale);
+    const trainer = scaleTrainer({ key, scaleId: d.scale, position: d.position, rootPc: pc(key), getBpm: () => bpm, onBpm: (b) => {
+      bpm = b;
+      api.setBpm(b);
+      tempo.show(b);
+    } });
     body.append(
-      h('div.row.between', h('div', h('div.eyebrow', 'Today’s key'), h('div.chord-name', key + (minorish ? ' minor' : ' major'))), labelSeg),
-      h('p.small', h('b', SCALES[d.scale].name + ', position ' + (d.position + 1) + '.')),
-      legend(d.scale === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
-      wrap,
-      h('p.small.muted', 'Up and back down in eighth notes, alternate picking. Keys rotate each time so the shape moves around the neck.'),
+      h('div', h('div.label', 'today’s key'), h('div.chord-name', key + (minorish ? ' minor' : ' major')), h('p.small', SCALES[d.scale].name + ', position ' + (d.position + 1) + '. Keys rotate each time so the shape moves around the neck.')),
+      trainer,
       tempo,
-      tr,
       rateRow(api.rate),
     );
+  },
+
+  piece(body, item, st, v, api) {
+    const p = PIECES[item.data.piece];
+    let bpm = st ? st.bpm : item.bpm[0];
+    const view = pieceView(p, { getBpm: () => bpm });
+    const tempo = tempoBox(item, st, (b) => {
+      bpm = b;
+      api.setBpm(b);
+      view.restart();
+    });
+    body.append(view, tempo, rateRow(api.rate));
   },
 
   notes(body, item, st, v, api) {
@@ -3709,189 +4203,7 @@ function playoutCard(step, { onDone }) {
   );
 }
 
-return { scaleKind, scaleDegreeKind, pickColumns, moveView, cheatBlock, itemCard, earQuestion, songCard, playoutCard };
-};
-__defs["ui/fretboard.js"] = () => {
-// The neck, drawn vertically like a chord book: nut at the top, low E on the left.
-// Notes are coloured by what they are: root, 3rd, 5th, extension, or other scale note.
-const { svg, h } = __req("ui/dom.js");
-const { fretMidi, noteName, parseChord } = __req("theory.js");
-const SG = 40; // string spacing
-const LEFT = 46; // room for fret numbers
-const RIGHT = 16;
-const OPEN = 26; // row above the nut for open/muted markers
-const INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
-const FINGER_ROW = 26;
-
-// Colour class for a note relative to a chord (or key) root.
-function degreeKind(midi, rootPc, quality = '') {
-  const iv = (((midi - rootPc) % 12) + 12) % 12;
-  if (iv === 0) return 'root';
-  if (iv === 3 || iv === 4) return 'third';
-  if (iv === 7 || (iv === 6 && /dim|b5/.test(quality)) || (iv === 8 && quality === 'aug')) return 'fifth';
-  return 'ext';
-}
-
-// dots: [{s, f, label, kind: root|third|fifth|ext|scale|blue|dim|ghost}]
-function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretboard', fh = 38, pickRow = false, box = false, stringNames = true } = {}) {
-  const base = from === 0 ? 0 : from - 1; // the wire at the top edge
-  const frets = to - base;
-  const top = OPEN;
-  const width = LEFT + SG * 5 + RIGHT;
-  const height = top + frets * fh + (pickRow ? FINGER_ROW + 6 : 8) + (stringNames && !box ? 14 : 0);
-  const x = (s) => LEFT + s * SG;
-  const yWire = (k) => top + (k - base) * fh;
-  const yCenter = (f) => (f === 0 ? top - OPEN / 2 + 2 : yWire(f) - fh / 2);
-  const root = svg('svg', { viewBox: `0 0 ${width} ${height}`, class: 'nk' + (box ? ' nk-box' : ' nk-long'), role: 'img', 'aria-label': label });
-  root.append(svg('rect', { x: x(0) - SG / 2 + 4, y: top, width: SG * 5 + SG - 8, height: frets * fh, class: 'nk-wood' }));
-  for (let f = Math.max(1, from); f <= to; f++) {
-    const cy = yCenter(f);
-    if (f % 12 === 0) {
-      root.append(svg('circle', { cx: x(1.5), cy, r: 4, class: 'nk-inlay' }));
-      root.append(svg('circle', { cx: x(3.5), cy, r: 4, class: 'nk-inlay' }));
-    } else if (INLAYS.includes(f)) root.append(svg('circle', { cx: x(2.5), cy, r: 4, class: 'nk-inlay' }));
-  }
-  for (let k = base; k <= to; k++) root.append(svg('line', { x1: x(0) - SG / 2 + 4, x2: x(5) + SG / 2 - 4, y1: yWire(k), y2: yWire(k), class: k === 0 ? 'nk-nut' : 'nk-fret' }));
-  for (let s = 0; s < 6; s++) root.append(svg('line', { x1: x(s), x2: x(s), y1: top, y2: top + frets * fh, class: 'nk-string', 'data-s': s, 'stroke-width': 2.4 - s * 0.3 }));
-  for (let f = Math.max(1, from); f <= to; f++)
-    if (f === from || INLAYS.includes(f) || f % 12 === 0) root.append(svg('text', { x: LEFT - SG / 2 - 2, y: yCenter(f) + 4, 'text-anchor': 'end', class: 'nk-num' }, String(f)));
-  for (const s of muted) root.append(svg('text', { x: x(s), y: top - 8, 'text-anchor': 'middle', class: 'nk-mute' }, '×'));
-  const dotLayer = svg('g');
-  for (const d of dots) {
-    if ((d.f < from && d.f !== 0) || d.f > to) continue;
-    const g = svg('g', { class: `nk-dot k-${d.kind || 'scale'}${d.f === 0 ? ' open' : ''}`, 'data-s': d.s, 'data-f': d.f });
-    g.append(svg('circle', { cx: x(d.s), cy: yCenter(d.f), r: d.f === 0 ? 8 : Math.min(14, fh / 2 - 3) }));
-    if (d.label != null && d.label !== '' && d.f !== 0) g.append(svg('text', { x: x(d.s), y: yCenter(d.f) + 4, 'text-anchor': 'middle' }, String(d.label)));
-    dotLayer.append(g);
-  }
-  root.append(dotLayer);
-  if (stringNames && !box) ['E', 'A', 'D', 'G', 'B', 'e'].forEach((n, s) => root.append(svg('text', { x: x(s), y: height - 3, 'text-anchor': 'middle', class: 'nk-sname' }, n)));
-  const hits = svg('g', { class: 'nk-hits' });
-  root.append(hits);
-  const pickY = top + frets * fh + FINGER_ROW / 2 + 6;
-  if (onTap) {
-    const taps = svg('g');
-    for (let s = 0; s < 6; s++)
-      for (let f = from === 0 ? 0 : from; f <= to; f++) {
-        const r = svg('rect', { x: x(s) - SG / 2, y: f === 0 ? 0 : yWire(f) - fh, width: SG, height: f === 0 ? OPEN : fh, class: 'nk-tap' });
-        r.addEventListener('click', () => onTap(s, f));
-        taps.append(r);
-      }
-    root.append(taps);
-  }
-  // Light up what is being played: string column + finger letter in the pick row.
-  root.highlight = (notes) => {
-    while (hits.firstChild) hits.firstChild.remove();
-    root.querySelectorAll('.nk-string.on').forEach((l) => l.classList.remove('on'));
-    for (const n of notes || []) {
-      if (n.s == null || n.s < 0) continue;
-      root.querySelector(`.nk-string[data-s="${n.s}"]`)?.classList.add('on');
-      if (!(n.f < from && n.f !== 0) && n.f <= to) hits.append(svg('circle', { cx: x(n.s), cy: yCenter(n.f), r: Math.min(17, fh / 2), class: 'nk-hit' }));
-      if (pickRow && n.label) {
-        hits.append(svg('rect', { x: x(n.s) - 13, y: pickY - 12, width: 26, height: 22, rx: 3, class: 'nk-pick-bg' }));
-        hits.append(svg('text', { x: x(n.s), y: pickY + 4, 'text-anchor': 'middle', class: 'nk-pick' }, n.label));
-      }
-    }
-  };
-  return root;
-}
-
-function windowFor(frets) {
-  const fretted = frets.filter((f) => f > 0);
-  const max = fretted.length ? Math.max(...fretted) : 0;
-  const min = fretted.length ? Math.min(...fretted) : 0;
-  const from = max <= 4 ? 0 : min;
-  const to = from === 0 ? Math.max(4, max) : from + Math.max(3, max - min);
-  return { from, to };
-}
-
-function boxDots(shape, sym, labels) {
-  let c = null;
-  try {
-    c = parseChord(sym || shape.sym);
-  } catch {
-    c = null;
-  }
-  const dots = [];
-  const muted = [];
-  shape.frets.forEach((f, s) => {
-    if (f < 0) return muted.push(s);
-    const m = fretMidi(s, f);
-    const fi = shape.fingers ? shape.fingers[s] : 0;
-    const lab = labels === 'finger' ? (f > 0 && fi ? fi : '') : labels === 'note' ? noteName(m % 12) : '';
-    dots.push({ s, f, kind: c ? degreeKind(m, c.root, c.quality) : 'scale', label: lab });
-  });
-  return { dots, muted };
-}
-
-// A chord box: a short window of the neck with finger numbers and degree colours.
-function chordBox(shape, { sym, labels = 'finger', label } = {}) {
-  const { from, to } = windowFor(shape.frets);
-  const { dots, muted } = boxDots(shape, sym, labels);
-  return neck({ from, to, dots, muted, label: label || `${sym || shape.sym} chord`, fh: 40, box: true });
-}
-
-// Chord box with a pick row underneath, for "pick this, then this".
-function pickBox(shape, { sym } = {}) {
-  const { from, to } = windowFor(shape.frets);
-  const { dots, muted } = boxDots(shape, sym, 'finger');
-  return neck({ from, to, dots, muted, label: `${sym || shape.sym}: pick the lit string`, fh: 40, box: true, pickRow: true });
-}
-
-// Tab (horizontal, like every tab book). columns: [{notes:[{s,f,tech}], mark}]
-function tab(columns, { label = 'Tab', beatEvery = 0 } = {}) {
-  const CW = 24;
-  const width = 22 + columns.length * CW + 10;
-  const height = 12 + 5 * 13 + 14;
-  const root = svg('svg', { viewBox: `0 0 ${width} ${height}`, class: 'tab', role: 'img', 'aria-label': label, width: Math.max(width, 200) });
-  const y = (s) => 12 + (5 - s) * 13;
-  const head = svg('rect', { x: -40, y: 4, width: CW - 2, height: 5 * 13 + 16, class: 'tab-head' });
-  root.append(head);
-  ['e', 'B', 'G', 'D', 'A', 'E'].forEach((n, i) => {
-    root.append(svg('text', { x: 4, y: 12 + i * 13 + 4, class: 'tab-str' }, n));
-    root.append(svg('line', { x1: 16, x2: width - 4, y1: 12 + i * 13, y2: 12 + i * 13, class: 'tab-line' }));
-  });
-  columns.forEach((col, i) => {
-    const cx = 22 + i * CW + CW / 2;
-    if (beatEvery && i % beatEvery === 0 && i > 0) root.append(svg('line', { x1: cx - CW / 2, x2: cx - CW / 2, y1: 12, y2: 12 + 5 * 13, class: 'tab-bar' }));
-    for (const n of col.notes) {
-      root.append(svg('rect', { x: cx - 8, y: y(n.s) - 6, width: 16, height: 12, class: 'tab-bg' }));
-      root.append(svg('text', { x: cx, y: y(n.s) + 4, 'text-anchor': 'middle', class: 'tab-num' }, String(n.f)));
-      if (n.tech) root.append(svg('text', { x: cx - 10, y: y(n.s) - 6, class: 'tab-tech' }, n.tech));
-    }
-    if (col.mark) root.append(svg('text', { x: cx, y: height - 2, 'text-anchor': 'middle', class: 'tab-mark' }, col.mark));
-  });
-  root.playhead = (i) => head.setAttribute('x', i == null || i < 0 ? -40 : 22 + i * CW + 1);
-  return root;
-}
-
-// Strum pattern row: arrows over counts.
-function strumRow(slots, { label = 'Strum pattern' } = {}) {
-  const n = slots.length;
-  const counts = n === 16 ? ['1', 'e', '&', 'a', '2', 'e', '&', 'a', '3', 'e', '&', 'a', '4', 'e', '&', 'a'] : n === 6 ? ['1', '&', 'a', '2', '&', 'a'] : ['1', '&', '2', '&', '3', '&', '4', '&'];
-  const row = h('div.strum', { role: 'img', 'aria-label': label + ': ' + slots.split('').join(' ') });
-  [...slots].forEach((c, i) => {
-    const glyph = c === 'D' ? '↓' : c === 'U' ? '↑' : c === 'X' ? '×' : '·';
-    row.append(h('div.strum-cell', { 'data-i': i, class: c === '.' ? 'rest' : c === 'X' ? 'chuck' : '' }, h('span.strum-glyph', glyph), h('span.strum-count', counts[i] || '')));
-  });
-  row.playhead = (i) => {
-    row.querySelectorAll('.strum-cell.on').forEach((x) => x.classList.remove('on'));
-    if (i != null && i >= 0) row.querySelector(`[data-i="${i}"]`)?.classList.add('on');
-  };
-  return row;
-}
-
-function noteLabel(s, f, flats) {
-  return noteName(fretMidi(s, f) % 12, flats);
-}
-
-// Legend for the note colours.
-function legend(kinds = ['root', 'third', 'fifth', 'ext']) {
-  const names = { root: 'root', third: '3rd', fifth: '5th', ext: '7th, 6th, 9th, sus', scale: 'other scale note', blue: 'blue note', dim: 'other positions' };
-  return h('div.legend', kinds.map((k) => h('span', h('i', { class: 'sw k-' + k }), names[k])));
-}
-
-return { degreeKind, neck, chordBox, pickBox, tab, strumRow, noteLabel, legend };
+return { scaleKind, scaleDegreeKind, pickColumns, pieceView, moveView, cheatBlock, itemCard, earQuestion, songCard, playoutCard };
 };
 __defs["moves.js"] = () => {
 // Moves: ways to get from one chord to the next that make the change sound deliberate.
@@ -4181,6 +4493,197 @@ function suggestedPairs(key) {
 
 return { MOVE_TYPES, bassPos, generateMoves, moveBySpec, plainChange, moveColumns, eventNotes, moveShapes, suggestedPairs };
 };
+__defs["ui/scaleTrainer.js"] = () => {
+// Scale practice: shows the order to play a position in, which finger to use, and plays along.
+const { h, btn, seg, setBtn } = __req("ui/dom.js");
+const { neck, noteLabel, legend } = __req("ui/fretboard.js");
+const A = __req("audio.js");
+const { scalePosition, SCALES, usesFlats, fretMidi } = __req("theory.js");
+const PATTERNS = {
+  updown: { name: 'Up & down', how: 'Lowest note to highest, then back down. Learn the shape first.' },
+  threes: { name: 'In 3s', how: '1-2-3, 2-3-4, 3-4-5… up, then the same coming down. Breaks the "just running up and down" habit.' },
+  fours: { name: 'In 4s', how: '1-2-3-4, 2-3-4-5… Makes the shape feel like music, not a ladder.' },
+  thirds: { name: 'Thirds', how: 'Skip a note each time: 1-3, 2-4, 3-5… This is where melodies come from.' },
+};
+
+// Build the playing order from the ascending notes of a position.
+function scaleSequence(asc, pattern) {
+  const up = [];
+  const down = [];
+  const rev = asc.slice().reverse();
+  if (pattern === 'threes' || pattern === 'fours') {
+    const g = pattern === 'threes' ? 3 : 4;
+    for (let i = 0; i + g <= asc.length; i++) up.push(...asc.slice(i, i + g).map((n, k) => ({ ...n, i: asc.indexOf(n), group: k === 0 })));
+    for (let i = 0; i + g <= rev.length; i++) down.push(...rev.slice(i, i + g).map((n, k) => ({ ...n, i: asc.indexOf(n), group: k === 0 })));
+    return [...up, ...down];
+  }
+  if (pattern === 'thirds') {
+    for (let i = 0; i + 2 < asc.length; i++) up.push({ ...asc[i], i, group: true }, { ...asc[i + 2], i: i + 2 });
+    for (let i = 0; i + 2 < rev.length; i++) down.push({ ...rev[i], i: asc.indexOf(rev[i]), group: true }, { ...rev[i + 2], i: asc.indexOf(rev[i + 2]) });
+    return [...up, ...down];
+  }
+  return [...asc.map((n, i) => ({ ...n, i })), ...rev.slice(1).map((n) => ({ ...n, i: asc.indexOf(n) }))];
+}
+
+// One finger per fret from the lowest fretted note of the position; the pinky stretches for a fifth fret.
+function fingerFor(asc) {
+  const fretted = asc.filter((n) => n.f > 0).map((n) => n.f);
+  const base = fretted.length ? Math.min(...fretted) : 1;
+  const map = new Map();
+  for (const n of asc) map.set(n.s + ':' + n.f, n.f === 0 ? 0 : Math.max(1, Math.min(4, n.f - base + 1)));
+  return map;
+}
+
+const STRINGS = ['low E', 'A', 'D', 'G', 'B', 'high e'];
+
+function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) {
+  const flats = usesFlats(key);
+  const asc = scalePosition(rootPc, scaleId, position);
+  const fingers = fingerFor(asc);
+  const fs = asc.map((n) => n.f);
+  const from = Math.max(0, Math.min(...fs) - 1);
+  const to = Math.max(from + 4, Math.max(...fs) + 1);
+  let pattern = 'updown';
+  let labels = 'order';
+  let mode = null; // 'play' | 'step'
+  let idx = -1;
+  let speed = false;
+  let seq = scaleSequence(asc, pattern);
+  const wrap = h('div.nk-wrap');
+  const readout = h('div.readout', { 'aria-live': 'polite' });
+  let board = null;
+  const kindOf = (n) => (n.degree === '1' ? 'root' : n.degree === '3' || n.degree === 'b3' ? 'third' : n.degree === '5' ? 'fifth' : n.degree === 'b5' ? 'blue' : 'scale');
+  const labelOf = (n, i) => (labels === 'order' ? i + 1 : labels === 'finger' ? fingers.get(n.s + ':' + n.f) || 'o' : labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats));
+  const draw = () => {
+    board = neck({ from: from === 0 ? 0 : from, to, dots: asc.map((n, i) => ({ s: n.s, f: n.f, kind: kindOf(n), label: labelOf(n, i) })), label: `${key} ${SCALES[scaleId].name} position ${position + 1}`, fh: 40 });
+    wrap.replaceChildren(board);
+    show();
+  };
+  const show = () => {
+    if (idx < 0) {
+      readout.replaceChildren(h('span.big', `${asc.length} notes`), h('span', `${PATTERNS[pattern].how} Numbers on the dots are the order going up.`));
+      board?.highlight(seq[0] ? [{ ...seq[0], next: true }] : []);
+      return;
+    }
+    const n = seq[idx % seq.length];
+    const nx = seq[(idx + 1) % seq.length];
+    board.highlight([{ s: n.s, f: n.f }, { s: nx.s, f: nx.f, next: true }]);
+    const fi = fingers.get(n.s + ':' + n.f);
+    readout.replaceChildren(h('span.big', `${(idx % seq.length) + 1}/${seq.length}`), h('span', `${STRINGS[n.s]} string · fret ${n.f} · ${fi ? 'finger ' + fi : 'open'} · ${n.degree === '1' ? 'root' : n.degree}`));
+  };
+  const labelsSeg = h('div');
+  const patSeg = h('div');
+  const drawSegs = () => {
+    patSeg.replaceChildren(seg(Object.entries(PATTERNS).map(([v, p]) => ({ value: v, label: p.name })), pattern, (v) => {
+      pattern = v;
+      seq = scaleSequence(asc, pattern);
+      stop();
+      drawSegs();
+      show();
+    }, { label: 'Order', id: 'st-pattern', wide: true }));
+    labelsSeg.replaceChildren(seg([{ value: 'order', label: 'Order' }, { value: 'finger', label: 'Finger' }, { value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], labels, (v) => {
+      labels = v;
+      drawSegs();
+      draw();
+    }, { label: 'Dot labels', id: 'st-labels', wide: true }));
+  };
+  const playB = btn('Play along', () => (mode === 'play' ? stop() : play()), { cls: 'primary', ico: 'play', id: 'st-play' });
+  const stepB = btn('Step by step', () => {
+    if (mode !== 'step') {
+      stop();
+      mode = 'step';
+      idx = -1;
+      stepB.classList.add('on');
+      nextB.hidden = false;
+      backB.hidden = false;
+    }
+    step(1);
+  }, { cls: 'quiet', id: 'st-step' });
+  const nextB = btn('Next note', () => step(1), { cls: 'primary big', id: 'st-next' });
+  const backB = btn('Back', () => step(-1), { cls: 'ghost small' });
+  nextB.hidden = true;
+  backB.hidden = true;
+  const speedB = btn('Speed trainer: off', () => {
+    speed = !speed;
+    speedB.classList.toggle('on', speed);
+    setBtn(speedB, speed ? 'Speed trainer: on' : 'Speed trainer: off');
+  }, { cls: 'quiet small', id: 'st-speed' });
+  function step(d) {
+    idx = Math.max(0, idx + d);
+    const n = seq[idx % seq.length];
+    A.pluck(fretMidi(n.s, n.f), A.now(), { vel: 0.65, dur: 0.9 });
+    show();
+  }
+  function stop() {
+    A.stopAll();
+    mode = null;
+    idx = -1;
+    playB.classList.remove('on');
+    stepB.classList.remove('on');
+    setBtn(playB, 'Play along', 'play');
+    nextB.hidden = true;
+    backB.hidden = true;
+    show();
+  }
+  function play() {
+    stop();
+    mode = 'play';
+    playB.classList.add('on');
+    setBtn(playB, 'Stop', 'stop');
+    const bpm = getBpm();
+    const triplet = pattern === 'threes';
+    const per = triplet ? 3 : 2; // notes per beat
+    const countIn = 4 * per;
+    const notes = seq.map((n) => [n.s, n.f, 1 / per]);
+    // one bar of count-in clicks, then the run
+    const events = [...Array(countIn).fill(null), ...notes];
+    const loop = new A.Loop({
+      bpm,
+      stepsPerBeat: per,
+      length: events.length,
+      loop: true,
+      onStep: (i, t) => {
+        if (i % per === 0) A.click(t, i === 0 || i === countIn);
+        const e = events[i];
+        if (e) A.pluck(fretMidi(e[0], e[1]), t, { vel: 0.55, dur: (60 / bpm / per) * 0.95 });
+        if (speed && i === events.length - 1) {
+          loop.setBpm(loop.bpm + 4);
+          onBpm && onBpm(loop.bpm);
+        }
+      },
+      onVisual: (i) => {
+        if (mode !== 'play') return;
+        if (i < countIn) {
+          idx = -1;
+          readout.replaceChildren(h('span.big', String(4 - Math.floor(i / per))), h('span', 'Count in… start on the first lit note.'));
+          board.highlight([{ ...seq[0], next: true }]);
+        } else {
+          idx = i - countIn;
+          show();
+        }
+      },
+    });
+    A.own(loop);
+  }
+  drawSegs();
+  draw();
+  const el = h(
+    'div.trainer.stack',
+    patSeg,
+    readout,
+    wrap,
+    h('div.row', playB, stepB, speedB),
+    h('div.row', nextB, backB),
+    labelsSeg,
+    legend(scaleId === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
+    h('details.small', h('summary', 'How to practise a scale (when you’re rubbish at them)'), h('ol.small', { style: { margin: '8px 0 0', paddingLeft: '20px' } }, h('li', 'Step by step first. Say the number or the degree out loud as you play each note.'), h('li', 'One finger per fret. The finger numbers are on the dots; switch the labels to Finger.'), h('li', 'Alternate picking: down, up, down, up, even across strings.'), h('li', 'Play along slowly. Clean and even beats fast and messy. Speed trainer adds 4 bpm after each clean pass.'), h('li', 'Once it’s in your hands, switch to In 3s or Thirds. That’s when it starts sounding like music.'))),
+  );
+  el.stop = stop;
+  return el;
+}
+
+return { PATTERNS, scaleSequence, fingerFor, scaleTrainer };
+};
 __defs["ai.js"] = () => {
 // Optional AI extras through the artifact's `sample` capability. Everything works without them.
 const { SCALES, pc, fretMidi } = __req("theory.js");
@@ -4380,9 +4883,9 @@ __defs["ui/pick.js"] = () => {
 // Pick lab: build a chord sequence, choose a pattern, watch which string to pick next. Save ideas.
 const { h, btn, seg, select, icon, toast, field, setBtn } = __req("ui/dom.js");
 const { pickBox, tab, strumRow } = __req("ui/fretboard.js");
-const { pickColumns } = __req("ui/items.js");
+const { pickColumns, pieceView, cheatBlock } = __req("ui/items.js");
 const A = __req("audio.js");
-const { PICKS, STRUMS, PROGRESSIONS, SPARKLE, shapeFor, romanChord, progressionChords } = __req("content.js");
+const { PICKS, STRUMS, PROGRESSIONS, SPARKLE, PIECES, shapeFor, romanChord, progressionChords } = __req("content.js");
 const { DIATONIC_MAJOR, BORROWED, capoFor, pc, parseChord, prettyChord } = __req("theory.js");
 const KEYS = ['C', 'G', 'D', 'A', 'E', 'F'];
 const FINGER = { B: 'p', A: 'p', F: 'p', '3': 'i', '2': 'm', '1': 'a' };
@@ -4400,8 +4903,40 @@ function numeralOf(key, sym) {
   return null;
 }
 
+let view = 'loop';
+let pieceBpm = 66;
+
+function modeSeg(root, ctx) {
+  return seg([{ value: 'loop', label: 'Build a loop' }, { value: 'pieces', label: 'Fingerstyle pieces' }], view, (v) => {
+    A.stopAll();
+    view = v;
+    root.replaceChildren();
+    render(root, ctx);
+  }, { label: 'Pick lab mode', id: 'pick-mode', wide: true });
+}
+
+function renderPieces(root, ctx) {
+  const bpmLabel = h('span.mono', String(pieceBpm));
+  const list = h('div');
+  const views = [];
+  for (const [id, p] of Object.entries(PIECES)) {
+    const v = pieceView(p, { getBpm: () => pieceBpm });
+    views.push(v);
+    list.append(h('section.sect', { id: 'piece-' + id }, h('div.sect-head', h('h2', p.name), h('span.label', p.key + (p.scale === 'minor' ? ' minor' : ' major') + (p.meter === 3 ? ' · 3/4' : ''))), cheatBlock(p.technique, false), v));
+  }
+  root.append(
+    h(
+      'div.stack-lg',
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Short pieces, each built on one fingerpicking idea: let-it-ring arpeggios, shapes over open-string drones, crosspicking, hammer-ons, bass with a melody on top. The jangly, ringing sound of British indie guitar is mostly these tricks.')),
+      h('div.field', h('span.field-label', 'tempo'), h('div.row.nowrap', h('input', { type: 'range', min: 40, max: 120, step: 2, value: pieceBpm, id: 'piece-bpm', 'aria-label': 'Tempo', oninput: (e) => ((pieceBpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)), onchange: () => views.forEach((v) => v.restart()) }), bpmLabel)),
+      list,
+    ),
+  );
+}
+
 function render(root, ctx) {
   if (!lab) initLab(ctx);
+  if (view === 'pieces') return renderPieces(root, ctx);
   let playing = false;
   const persist = () => ctx.update((s) => ({ ...s, settings: { ...s.settings, pickLab: { ...lab } } }));
   const isStrum = () => !!STRUMS[lab.pattern];
@@ -4609,7 +5144,7 @@ function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Pick lab'), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
       h('section.stack', h('div.label', 'key'), keyHolder, palette),
       h('section.sect', h('div.sect-head', h('h2', 'Your loop'), presetSel), progRow, suggest, capo),
       h('section.sect', h('div.fields', field('pattern', patternSel), field('tempo', h('div.row.nowrap', bpmInput, bpmLabel))), feel, h('div.row', sparkleB, melodyB)),
@@ -4639,10 +5174,11 @@ __defs["ui/neck.js"] = () => {
 const { h, btn, seg, select, field } = __req("ui/dom.js");
 const { neck, chordBox, noteLabel, legend, degreeKind } = __req("ui/fretboard.js");
 const { scaleKind } = __req("ui/items.js");
+const { scaleTrainer } = __req("ui/scaleTrainer.js");
 const A = __req("audio.js");
 const { SCALES, CHORDS, pc, noteName, usesFlats, scalePosition, allScaleNotes, findVoicings, identifyChord, fretMidi, TUNING, prettyChord } = __req("theory.js");
 const { SHAPES } = __req("content.js");
-let ui = { mode: 'scales', key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
+let ui = { mode: 'scales', view: 'look', bpm: 70, key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
 const ROOTS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 const QUALS = ['', 'm', '7', 'maj7', 'm7', 'sus2', 'sus4', 'add9', '6', 'm6', '5', 'dim', 'aug', '7sus4', 'madd9', 'm7b5'];
 const PARENT = { majPent: 'major', minPent: 'minor', blues: 'minor' };
@@ -4688,6 +5224,29 @@ function scales(body) {
   const sc = SCALES[ui.scale];
   const nPos = sc.steps.length <= 6 ? 5 : 7;
   if (ui.pos >= nPos) ui.pos = -1;
+  const viewSeg = field('what to do', seg([{ value: 'look', label: 'Look at it' }, { value: 'practise', label: 'Practise it' }], ui.view, (v) => {
+    ui.view = v;
+    if (v === 'practise' && ui.pos < 0) ui.pos = 0;
+    rerender(body, scales);
+  }, { label: 'Look or practise', id: 'sc-view', wide: true }));
+  if (ui.view === 'practise') {
+    if (ui.pos < 0) ui.pos = 0;
+    const bpmLabel = h('span.mono', String(ui.bpm));
+    const slider = h('input', { type: 'range', min: 40, max: 160, step: 2, value: ui.bpm, id: 'sc-bpm', 'aria-label': 'Tempo', oninput: (e) => ((ui.bpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)) });
+    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => ui.bpm, onBpm: (b) => {
+      ui.bpm = b;
+      slider.value = b;
+      bpmLabel.textContent = String(b);
+    } });
+    body.append(
+      viewSeg,
+      h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
+      field('position', seg(Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) })), ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
+      field('tempo', h('div.row.nowrap', slider, bpmLabel)),
+      trainer,
+    );
+    return;
+  }
   const keyPc = pc(ui.key);
   const flats = usesFlats(ui.key) || ui.key.includes('b');
   const all = allScaleNotes(keyPc, ui.scale, 17);
@@ -4706,13 +5265,14 @@ function scales(body) {
   const posOpts = [{ value: -1, label: 'All' }, ...Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) }))];
   const span = box ? `frets ${Math.min(...box.map((n) => n.f))}–${Math.max(...box.map((n) => n.f))}` : 'every note, frets 0–17';
   body.append(
+    viewSeg,
     h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
     field('position', seg(posOpts, ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
     chordsHere.length ? field('show a chord inside the scale', seg([{ value: 'none', label: 'Scale' }, ...chordsHere.map((c) => ({ value: c.id, label: c.id }))], ui.overlay, (v) => ((ui.overlay = v), rerender(body, scales)), { label: 'Chord overlay', id: 'sc-ov', wide: true })) : null,
     h('div.row.between', h('span.label', `${ui.key} ${sc.name.toLowerCase()} · ${span}${ov ? ` · ${prettyChord(ov.sym)} lit` : ''}`), seg([{ value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], ui.labels, (v) => ((ui.labels = v), rerender(body, scales)), { label: 'Labels' })),
     legend(ui.scale === 'blues' && !ov ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
     h('div.nk-wrap', board),
-    box ? h('div.row', btn('Play this position', () => A.playTab([...box, ...box.slice(0, -1).reverse()].map((n) => [n.s, n.f, 0.5]), 96, {}), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap any dot to hear it. Pick a position to see one hand shape at a time; the others fade.'),
+    box ? h('div.row', btn('Practise this position', () => ((ui.view = 'practise'), rerender(body, scales)), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap any dot to hear it. Pick a position to see one hand shape at a time; the others fade. Then press Practise it.'),
     h(
       'p.small.muted',
       ui.scale === 'minPent'

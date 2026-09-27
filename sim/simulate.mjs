@@ -22,7 +22,7 @@ function rng(seed) {
   };
 }
 
-const KIND_DIFF = { pick: 1.25, strum: 0.8, barre: 1.15, scale: 1.0, notes: 0.9, lick: 0.85, melody: 0.95, prog: 0.7, write: 1.0, ear: 0.9, move: 0.95 };
+const KIND_DIFF = { pick: 1.25, strum: 0.8, barre: 1.15, scale: 1.0, notes: 0.9, lick: 0.85, melody: 0.95, prog: 0.7, write: 1.0, ear: 0.9, move: 0.95, piece: 1.2 };
 const sig = (x) => 1 / (1 + Math.exp(-x));
 
 // The learner: hidden skill per item that grows with practice and fades with time.

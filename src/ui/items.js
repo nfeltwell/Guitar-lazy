@@ -3,7 +3,8 @@ import { h, btn, icon, seg, toast, setBtn } from './dom.js';
 import { neck, chordBox, pickBox, tab, strumRow, noteLabel, legend, degreeKind } from './fretboard.js';
 import { moveBySpec, moveColumns, moveShapes, plainChange, MOVE_TYPES } from '../moves.js';
 import * as A from '../audio.js';
-import { CHEATS, PICKS, STRUMS, LICKS, MELODIES, PROGRESSIONS, TRACKS, shapeFor, barreShape, progressionChords, romanChord, SPARKLE } from '../content.js';
+import { CHEATS, PICKS, STRUMS, LICKS, MELODIES, PROGRESSIONS, TRACKS, PIECES, pieceColumns, shapeFor, barreShape, progressionChords, romanChord, SPARKLE } from '../content.js';
+import { scaleTrainer } from './scaleTrainer.js';
 import { pc, noteName, usesFlats, scalePosition, SCALES, INTERVALS, CHORDS, capoFor, transposeSym, fretMidi, TUNING, parseChord, prettyChord } from '../theory.js';
 import { hasTempo, isLocked, ratingFromScore } from '../srs.js';
 import { explainHarmony, getSample, aiErrorText } from '../ai.js';
@@ -45,6 +46,65 @@ export function pickColumns(steps) {
     notes: s.notes.flatMap((n) => (n.mute ? [3, 4, 5].map((st) => ({ s: st, f: 'x' })) : [{ s: n.s, f: n.f }])),
     mark: s.slot % 2 === 0 ? String(s.slot / 2 + 1) : '&',
   }));
+}
+
+// A fingerstyle piece: follow the lit string and the finger under it, with the tab below.
+const PIMA = ['p', 'p', 'p', 'i', 'm', 'a'];
+export function pieceView(p, { getBpm = () => 70 } = {}) {
+  const cols = pieceColumns(p);
+  const per = p.meter === 3 ? 6 : 8;
+  const now = h('span.now', p.bars[0][0]);
+  const next = h('span.next', p.bars.length > 1 ? 'next ' + p.bars[1][0] : '');
+  const wrap = h('div.nk-wrap');
+  const keyPc = pc(p.key);
+  let board = null;
+  let curBar = -1;
+  const showBar = (bi) => {
+    if (bi === curBar) return;
+    curBar = bi;
+    const notes = cols.filter((c) => c.bar === bi).flatMap((c) => c.notes);
+    const fr = notes.map((n) => n.f).filter((f) => f > 0);
+    const hi = fr.length ? Math.max(...fr) : 0;
+    const lo = fr.length ? Math.min(...fr) : 0;
+    const from = hi <= 4 ? 0 : lo;
+    const to = from === 0 ? Math.max(4, hi) : from + Math.max(3, hi - lo);
+    const uniq = new Map(notes.map((n) => [n.s + ':' + n.f, n]));
+    board = neck({ from, to, dots: [...uniq.values()].map((n) => ({ s: n.s, f: n.f, kind: scaleDegreeKind(fretMidi(n.s, n.f), keyPc, p.scale), label: '' })), fh: 40, box: true, pickRow: true, label: p.name + ', bar ' + (bi + 1) });
+    wrap.replaceChildren(board);
+    now.textContent = p.bars[bi][0];
+    next.textContent = p.bars.length > 1 ? 'next ' + p.bars[(bi + 1) % p.bars.length][0] : '';
+  };
+  showBar(0);
+  const t = tab(cols.map((c) => ({ notes: c.notes.map((n) => ({ s: n.s, f: n.f, tech: n.tech })), mark: c.slot % 2 === 0 ? String(c.slot / 2 + 1) : '&' })), { beatEvery: per, label: p.name + ' tab' });
+  let playing = false;
+  const playB = btn('Play', () => (playing ? stop() : play()), { cls: 'primary', ico: 'play' });
+  function play() {
+    A.stopAll();
+    playing = true;
+    playB.classList.add('on');
+    setBtn(playB, 'Stop', 'stop');
+    A.playPiece(cols, getBpm(), {
+      meter: p.meter,
+      click: false,
+      onCol: (i) => {
+        const c = cols[i];
+        showBar(c.bar);
+        board.highlight(c.notes.map((n) => ({ s: n.s, f: n.f, label: PIMA[n.s] })));
+        t.playhead(i);
+      },
+    });
+  }
+  function stop() {
+    A.stopAll();
+    playing = false;
+    playB.classList.remove('on');
+    setBtn(playB, 'Play', 'play');
+    t.playhead(-1);
+  }
+  const el = h('div.stack', h('p', p.about), h('div.current-chord', now, next), wrap, h('div.tab-wrap', t), h('div.row', playB), h('p.small.muted', 'Thumb (p) takes the three bass strings; index, middle and ring (i, m, a) take G, B and e. Hold each chord shape down so everything rings.'));
+  el.restart = () => playing && play();
+  el.stop = stop;
+  return el;
 }
 
 // A move: the chord chain, why it works, tab, chord boxes, play and compare.
@@ -125,6 +185,10 @@ function tempoBox(item, st, onChange) {
     dots.querySelectorAll('span').forEach((d, j) => d.classList.toggle('on', j === i % 4));
   };
   box.get = () => bpm;
+  box.show = (b) => {
+    bpm = b;
+    val.textContent = String(b);
+  };
   return box;
 }
 
@@ -337,56 +401,35 @@ const RENDER = {
   scale(body, item, st, v, api) {
     const d = item.data;
     const key = v.key || d.keys[0];
-    const notes = scalePosition(pc(key), d.scale, d.position);
-    const fs = notes.map((n) => n.f);
-    const from = Math.max(0, Math.min(...fs) - 1);
-    const to = Math.max(from + 5, Math.max(...fs) + 1);
-    let labels = 'degree';
     let bpm = st ? st.bpm : item.bpm[0];
-    const wrap = h('div.nk-wrap');
-    const flats = usesFlats(key);
-    const draw = () => {
-      const b = neck({
-        from: from === 0 ? 0 : from,
-        to,
-        dots: notes.map((n) => ({ s: n.s, f: n.f, kind: scaleKind(n.degree), label: labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats) })),
-        label: `${key} ${SCALES[d.scale].name} position ${d.position + 1}`,
-      });
-      wrap.replaceChildren(b);
-      return b;
-    };
-    let board = draw();
-    const run = [...notes, ...notes.slice(0, -1).reverse()].map((n) => [n.s, n.f, 0.5]);
+    const minorish = ['minPent', 'blues', 'minor', 'dorian'].includes(d.scale);
     const tempo = tempoBox(item, st, (b) => {
       bpm = b;
       api.setBpm(b);
-      tr.restart();
     });
-    const tr = transport({
-      onPlay: () => A.playTab(run, bpm, { loop: true, click: true, onNote: (i) => board.highlight([{ s: run[i][0], f: run[i][1] }]) }),
-      onMetro: () => A.metronome(bpm, 4, (i) => tempo.beat(i)),
-    });
-    const labelSeg = h('div');
-    const drawSeg = () =>
-      labelSeg.replaceChildren(
-        seg([{ value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], labels, (x) => {
-          labels = x;
-          board = draw();
-          drawSeg();
-        }, { label: 'Labels' }),
-      );
-    drawSeg();
-    const minorish = ['minPent', 'blues', 'minor', 'dorian'].includes(d.scale);
+    const trainer = scaleTrainer({ key, scaleId: d.scale, position: d.position, rootPc: pc(key), getBpm: () => bpm, onBpm: (b) => {
+      bpm = b;
+      api.setBpm(b);
+      tempo.show(b);
+    } });
     body.append(
-      h('div.row.between', h('div', h('div.eyebrow', 'Today’s key'), h('div.chord-name', key + (minorish ? ' minor' : ' major'))), labelSeg),
-      h('p.small', h('b', SCALES[d.scale].name + ', position ' + (d.position + 1) + '.')),
-      legend(d.scale === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
-      wrap,
-      h('p.small.muted', 'Up and back down in eighth notes, alternate picking. Keys rotate each time so the shape moves around the neck.'),
+      h('div', h('div.label', 'today’s key'), h('div.chord-name', key + (minorish ? ' minor' : ' major')), h('p.small', SCALES[d.scale].name + ', position ' + (d.position + 1) + '. Keys rotate each time so the shape moves around the neck.')),
+      trainer,
       tempo,
-      tr,
       rateRow(api.rate),
     );
+  },
+
+  piece(body, item, st, v, api) {
+    const p = PIECES[item.data.piece];
+    let bpm = st ? st.bpm : item.bpm[0];
+    const view = pieceView(p, { getBpm: () => bpm });
+    const tempo = tempoBox(item, st, (b) => {
+      bpm = b;
+      api.setBpm(b);
+      view.restart();
+    });
+    body.append(view, tempo, rateRow(api.rate));
   },
 
   notes(body, item, st, v, api) {

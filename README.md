@@ -10,8 +10,8 @@ It is tuned for an intermediate player who skipped scales. You know your open ch
 |---|---|
 | **Today** | Choose 2, 10, 20, 30 or 60 minutes and press Start. It shows the countdown to the next milestone, with separate bars for picking, fretboard, ear and writing. The slowest bar sets the date. |
 | **Session** | One playable item at a time: tab, a fretboard that lights up the string to pick (p/i/m/a), a metronome at your current tempo, and playback so you hear the target first. You rate each item *clean / sloppy / couldn't*. A clean rating speeds the item up next time; a miss slows it down. Every session ends with a minute of free play over a loop, then **"Done. Go live your life."** |
-| **Neck** | Every scale up and down the whole neck (frets 0–17, drawn vertically like a chord book), in any key and position. Notes are coloured by role: root orange, 3rd yellow, 5th blue. A chord overlay shows where the I, IV, V or vi chord sits inside the scale. Also: every voicing of any chord up the neck, *Name it* (tap frets and it names the chord), a note map, and reference tones for tuning. |
-| **Pick** | The Pick lab. Build a chord loop from numbered chips (the six chords in the key plus borrowed chords), with "sounds nice next" suggestions and the capo trick. Choose one of 19 picking or 8 strumming patterns (basic, pinch, bass-switch and 6/8 Travis, rolls, pinch roll, thumb slap, boom-chucka…), add sparkle chords or a melody on top, and follow the lit string: the letter under it is the finger (p i m a). Save loops as ideas. |
+| **Neck** | Every scale up and down the whole neck (frets 0–17, drawn vertically like a chord book), in any key and position. **Practise it** mode numbers every note in the order you play it and shows which finger to use. It has a guided play-along with count-in (the current note is ringed in red, the next one dashed), a tap-for-next-note mode, up-and-down / in 3s / in 4s / thirds patterns, and a speed trainer. Notes are coloured by role: root orange, 3rd yellow, 5th blue. A chord overlay shows where the I, IV, V or vi chord sits inside the scale. Also: every voicing of any chord up the neck, *Name it* (tap frets and it names the chord), a note map, and reference tones for tuning. |
+| **Pick** | **Fingerstyle pieces:** 8 short original pieces, each built on one fingerpicking idea behind the ringing, jangly Johnny Marr / British indie sound: let-it-ring arpeggios, small shapes over an open-string drone, crosspicking, hammer-on arpeggios, a walking-bass arpeggio, bass plus melody, a 3/4 waltz and open-string shimmer chords. Each plays back with the string and finger lit, and notes ring on until that string is played again. **Build a loop:** build a chord loop from numbered chips (the six chords in the key plus borrowed chords), with "sounds nice next" suggestions and the capo trick. Choose one of 21 picking or 8 strumming patterns (basic, pinch, bass-switch and 6/8 Travis, crosspicking, ringing arpeggio, rolls, pinch roll, thumb slap, boom-chucka…), add sparkle chords or a melody on top, and follow the lit string: the letter under it is the finger (p i m a). Save loops as ideas. |
 | **Moves** | Pick any two chords in a key and get the ways to connect them, each with tab, playback, a "without it" comparison and one line on why it works: bass walk-ups and walk-downs, half-step approach notes, slash-chord bridges (C – G/B – Am), passing chords, secondary dominants (C – E7 – Am), sus flicks, line clichés (Am – Am(maj7) – Am7 – Am6), anchor-finger voicings and melodic fills on the top strings. Any move can be added to your practice. |
 | **Jam** | Backing tracks (folk picking, Britpop strum, jangle, 1975 funk…) over 19 progressions or your saved ideas. Every note that fits is shown on the neck, and the current chord's notes light up in colour as it changes. |
 | **You** | Your milestone path, the countdown with its levers, ear training (quizzes plus a **hands-free mode** that speaks the questions), 14-day history, weekly recording log, song repertoire (spaced so songs don't fade), AI coach, AI lick generator, the full library, and settings. |
@@ -19,11 +19,11 @@ It is tuned for an intermediate player who skipped scales. You know your open ch
 ### How it teaches
 
 - **Placement check first.** It asks what you can do (pre-filled from what you said), tests five items, and skips what you already play.
-- **Items, not lessons.** There are 106 playable items: picking patterns, strums, barre shapes, scale positions, fretboard-note quizzes, licks, chord-connecting moves, melodies learned by ear, progressions in several keys, writing prompts and ear quizzes. Each has a target tempo. **Locked in = clean at target tempo on 3 separate days.** Keys and positions rotate from one review to the next.
+- **Items, not lessons.** There are 116 playable items: picking patterns, fingerstyle pieces, strums, barre shapes, scale positions, fretboard-note quizzes, licks, chord-connecting moves, melodies learned by ear, progressions in several keys, writing prompts and ear quizzes. Each has a target tempo. **Locked in = clean at target tempo on 3 separate days.** Keys and positions rotate from one review to the next.
 - **Weak spots first.** New material comes from the track furthest behind. Theory arrives as 16 short cheat codes, each shown just before the item it unlocks.
 - **Forgiving scheduler.** A miss keeps 30% of the old gap rather than starting over. A clean rep after a long gap earns a bigger jump. A pile of reviews holds back new material. The shakiest items come first. The number of unfinished items allowed at once scales with how much you actually practise.
 - **Milestones:** Travis on autopilot → Pretty chords → Smooth changes → Know the neck → **Noodle & write** (your goal) → Solo over a jam.
-- **Design.** It takes its cues from real gear rather than web templates: graphite panels, condensed Archivo type, monospace tab and labels, square corners, no shadows. The neck is ebony in both light and dark mode, and the note colours mean the same thing everywhere: orange root, yellow 3rd, blue 5th, lilac 7ths/6ths/9ths.
+- **Design.** A songwriter's notebook: paper with grain, a pencil-drawn neck (the wobble is generated but stable), coloured-pencil note dots, handwritten headings (Kalam), typed tab (Courier Prime), a highlighter for what's playing and a red pen for the current note. Dark mode is chalk on slate. The note colours mean the same thing everywhere: red root, yellow 3rd, blue 5th, green 7ths/6ths/9ths.
 
 ### Honest about limits
 
@@ -36,7 +36,7 @@ It is tuned for an intermediate player who skipped scales. You know your open ch
 ## How it's checked
 
 ```
-npm test        # build + content audit + 38 tests
+npm test        # build + content audit + 40 tests
 npm run sim     # the practice simulation report
 npm run sim -- --write   # regenerate src/calibration.js and docs/SIMULATION.md
 ```
@@ -47,6 +47,7 @@ npm run sim -- --write   # regenerate src/calibration.js and docs/SIMULATION.md
    - every progression resolves to a playable shape in 5 keys;
    - every lick and melody note is in its key, hammer-ons go up and pull-offs go down, and nothing spans more than one hand position;
    - every picking pattern maps onto real, unmuted strings;
+   - every fingerstyle piece stays in key, never needs more than four fingers or a stretch wider than four frets, never plays one string twice at once, and every hammer-on goes up and every pull-off goes down on the same string;
    - every move the Moves tab can generate (about 1,650 across 5 keys and every pair of chords in each key) stays on the neck, uses correctly spelled chords, stays in key unless it is deliberately chromatic, and walks the bass by step;
    - the prerequisites have no cycles, and each milestone only needs earlier material.
 2. **Engine tests** (`test/engine.test.mjs`). These cover the scale boxes, chord naming, the voicing finder, Roman numerals, the lock-in rule, the 30% lapse, the long-gap bonus, the backlog throttle, shakiest-first ordering, placement, the countdown, the levers and the forgiving streak.
@@ -59,8 +60,8 @@ npm run sim -- --write   # regenerate src/calibration.js and docs/SIMULATION.md
 - **Tempo steps of 10%**, not 5%. Small steps waste reps well below your real ability, and the goal comes about 3 weeks later.
 - **Ear training is the natural bottleneck** if you only do it hands-free. The planner now slips up to two short ear quizzes into a guitar session whenever ear is the slowest track.
 - The 30% lapse, the long-gap bonus and shakiest-first were in the brief. In simulation they are neutral to slightly positive (differences within noise), so they stay.
-- **The countdown is calibrated.** Reps-to-lock per item type and review overhead are measured, and one correction factor is fitted. On the "you" profile the median predicted/actual ratio is 1.00 (half of predictions fall between 0.66× and 1.44×). For a much lazier player it overestimates (1.56×), which errs on the safe side.
-- **At your pace:** Travis on autopilot ≈ day 77, Smooth changes ≈ day 131, Noodle & write ≈ day 147 (about 5 months). After that, the Moves tab, the AI lick generator, your repertoire and your saved ideas keep sessions going.
+- **The countdown is calibrated.** Reps-to-lock per item type and review overhead are measured, and one correction factor is fitted. On the "you" profile the median predicted/actual ratio is 1.00 (half of predictions fall between 0.55× and 1.33×). For a much lazier player it overestimates (1.65×), which errs on the safe side.
+- **At your pace:** Travis on autopilot ≈ day 76, Smooth changes ≈ day 145, Noodle & write ≈ day 163 (about 5½ months). After that, the Moves tab, the AI lick generator, your repertoire and your saved ideas keep sessions going.
 
 ## Layout
 
@@ -75,6 +76,7 @@ src/calibration.js generated by the simulation
 src/audio.js       plucked-string synthesis, metronome, drums/bass backing, speech
 src/store.js       account sync (artifact db) + local copy
 src/ai.js          optional AI extras with output validation
+src/ui/scaleTrainer.js  scale practice: order, fingers, play-along
 src/ui/*.js        screens
 scripts/build.mjs  bundles everything into dist/lazy-guitar.html (one self-contained page)
 ```

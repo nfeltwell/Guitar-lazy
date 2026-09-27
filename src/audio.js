@@ -90,6 +90,7 @@ export function pluck(midi, when = now(), { vel = 0.7, dur = 0, bright = 0.55, g
   src.connect(g);
   g.connect(dest || guitarBus);
   src.start(when);
+  src._gain = g;
   if (dur) {
     g.gain.setValueAtTime(vel, when + dur);
     g.gain.exponentialRampToValueAtTime(0.001, when + dur + 0.08);
@@ -276,7 +277,7 @@ export function stopAll() {
   current = null;
   if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
-function own(loop) {
+export function own(loop) {
   stopAll();
   current = loop;
   return loop.start();
@@ -436,6 +437,29 @@ export function playTab(notes, bpm, opts = {}) {
         const e = byStep.get(i);
         if (e && opts.onNote) opts.onNote(e.idx);
       },
+    }),
+  );
+}
+
+// Play a fingerstyle piece: notes ring until the same string is played again (like a real guitar).
+export function playPiece(cols, bpm, { loop = true, onCol, click: withClick = false, meter = 4 } = {}) {
+  const last = new Array(6).fill(null);
+  return own(
+    new Loop({
+      bpm,
+      stepsPerBeat: 2,
+      length: cols.length,
+      loop,
+      onStep: (i, t) => {
+        if (withClick && i % 2 === 0) click(t, i % (meter * 2) === 0);
+        for (const n of cols[i].notes) {
+          const prev = last[n.s];
+          if (prev && prev._gain) prev._gain.gain.setTargetAtTime(0.0001, t, 0.015);
+          const soft = n.tech === 'h' || n.tech === 'p';
+          last[n.s] = pluck(fretMidi(n.s, n.f), t, { vel: soft ? 0.42 : n.s <= 2 ? 0.58 : 0.5, bright: n.s <= 2 ? 0.4 : 0.6 });
+        }
+      },
+      onVisual: (i) => onCol && onCol(i),
     }),
   );
 }

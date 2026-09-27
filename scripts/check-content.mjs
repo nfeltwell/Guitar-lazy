@@ -1,6 +1,6 @@
 // Content audit: every chord shape spells its chord, every lick stays in key, every item is reachable.
 // Usage: node scripts/check-content.mjs   (exit code 1 on any problem)
-import { SHAPES, BARRES, barreShape, SPARKLE, PICKS, STRUMS, PROGRESSIONS, LICKS, MELODIES, CHEATS, ITEMS, ITEM_BY_ID, MILESTONES, PLACEMENT, TRACKS, FRIENDLY_KEYS, romanChord, shapeFor, roleStrings } from '../src/content.js';
+import { SHAPES, BARRES, barreShape, SPARKLE, PICKS, STRUMS, PROGRESSIONS, LICKS, MELODIES, CHEATS, ITEMS, ITEM_BY_ID, MILESTONES, PLACEMENT, TRACKS, FRIENDLY_KEYS, PIECES, pieceColumns, romanChord, shapeFor, roleStrings } from '../src/content.js';
 import { shapeMatches, fingersNeeded, shapeSpan, SCALES, pc, fretMidi, parseChord, noteName, DIATONIC_MAJOR, BORROWED, INTERVALS } from '../src/theory.js';
 import { pickSteps, strumSteps } from '../src/audio.js';
 import { generateMoves, moveBySpec, eventNotes } from '../src/moves.js';
@@ -95,6 +95,39 @@ export function audit() {
   for (const [id, lk] of Object.entries(LICKS)) checkTab('lick', id, lk);
   for (const [id, lk] of Object.entries(MELODIES)) checkTab('melody', id, lk);
 
+  // Fingerstyle pieces: in key, playable, and hammer-ons/pull-offs that make sense.
+  for (const [id, p] of Object.entries(PIECES)) {
+    const where = 'piece ' + id;
+    if (!CHEATS[p.technique]) err(where, 'unknown technique ' + p.technique);
+    const per = p.meter === 3 ? 6 : 8;
+    p.bars.forEach(([, bar], i) => {
+      if (bar.trim().split(/\s+/).length !== per) err(where, `bar ${i + 1} needs ${per} eighth notes`);
+    });
+    let cols;
+    try {
+      cols = pieceColumns(p);
+    } catch (e) {
+      err(where, e.message);
+      continue;
+    }
+    const scale = SCALES[p.scale].steps.map((s) => (s + pc(p.key)) % 12);
+    const lastOn = new Array(6).fill(null);
+    cols.forEach((c, i) => {
+      const fretted = c.notes.filter((n) => n.f > 0).map((n) => n.f);
+      if (fretted.length > 4) err(where, `column ${i + 1} needs more than four fingers`);
+      if (fretted.length && Math.max(...fretted) - Math.min(...fretted) > 4) err(where, `column ${i + 1} stretches more than four frets`);
+      if (new Set(c.notes.map((n) => n.s)).size !== c.notes.length) err(where, `column ${i + 1} plays one string twice`);
+      for (const n of c.notes) {
+        if (!(n.f >= 0 && n.f <= 12)) err(where, `column ${i + 1} is off the neck`);
+        if (!scale.includes(fretMidi(n.s, n.f) % 12)) err(where, `column ${i + 1}: ${noteName(fretMidi(n.s, n.f) % 12)} is not in ${p.key} ${p.scale}`);
+        const prev = lastOn[n.s];
+        if (n.tech === 'h' && !(prev != null && prev < n.f)) err(where, `column ${i + 1}: hammer-on must go up from the last note on that string`);
+        if (n.tech === 'p' && !(prev != null && prev > n.f)) err(where, `column ${i + 1}: pull-off must go down from the last note on that string`);
+        lastOn[n.s] = n.f;
+      }
+    });
+  }
+
   // Moves: sweep every key and chord pair. Notes on the neck, shapes spell their chords,
   // and only the deliberately chromatic moves leave the key.
   let moveCount = 0;
@@ -134,7 +167,7 @@ export function audit() {
 
   // Items
   const ids = new Set();
-  const KINDS = new Set(['pick', 'strum', 'change', 'barre', 'scale', 'notes', 'lick', 'melody', 'prog', 'write', 'ear', 'move']);
+  const KINDS = new Set(['pick', 'strum', 'change', 'barre', 'scale', 'notes', 'lick', 'melody', 'prog', 'write', 'ear', 'move', 'piece']);
   for (const it of ITEMS) {
     const w = 'item ' + it.id;
     if (ids.has(it.id)) err(w, 'duplicate id');
@@ -174,6 +207,7 @@ export function audit() {
       for (const k of d.keys) pc(k);
     }
     if (it.kind === 'lick' && !LICKS[d.lick]) err(w, 'unknown lick');
+    if (it.kind === 'piece' && !PIECES[d.piece]) err(w, 'unknown piece');
     if (it.kind === 'move') {
       const mv = moveBySpec(d);
       if (!mv) err(w, 'no such move');
@@ -230,5 +264,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error(`\n${errors.length} problem(s).`);
     process.exit(1);
   }
-  console.log(`✓ Content audit passed: ${audit.moveCount} generated moves across 5 keys, ${Object.keys(SHAPES).length} shapes, 12 keys × ${Object.values(BARRES).reduce((a, b) => a + Object.keys(b).length - 1, 0)} barre forms, ${Object.keys(PICKS).length} picking patterns, ${Object.keys(PROGRESSIONS).length} progressions × ${FRIENDLY_KEYS.length} keys, ${Object.keys(LICKS).length + Object.keys(MELODIES).length} licks/melodies, ${ITEMS.length} items, ${MILESTONES.length} milestones.`);
+  console.log(`✓ Content audit passed: ${audit.moveCount} generated moves across 5 keys, ${Object.keys(SHAPES).length} shapes, 12 keys × ${Object.values(BARRES).reduce((a, b) => a + Object.keys(b).length - 1, 0)} barre forms, ${Object.keys(PICKS).length} picking patterns, ${Object.keys(PROGRESSIONS).length} progressions × ${FRIENDLY_KEYS.length} keys, ${Object.keys(LICKS).length + Object.keys(MELODIES).length} licks/melodies, ${Object.keys(PIECES).length} fingerstyle pieces, ${ITEMS.length} items, ${MILESTONES.length} milestones.`);
 }

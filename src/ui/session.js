@@ -111,7 +111,7 @@ function renderDone(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.done-hero', h('div.label', 'session complete'), h('h1', 'Done. Go live your life.'), h('p.mono.small.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
+      h('div.done-hero', h('div.label', 'session complete'), h('h1', 'Done. ', h('span', 'Go live your life.')), h('p.mono.small.muted', `${Math.max(1, Math.round(s.spent))} min${st.last7 ? ` · ${st.last7} of the last 7 days` : ''}`)),
       h('section.sect', ...lines, h('p.small.muted', honest)),
       h('div.row', btn('Back to today', () => {
         session = null;

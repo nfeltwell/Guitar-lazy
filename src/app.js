@@ -3,6 +3,7 @@ import { createStore } from './store.js';
 import { dayNumber } from './srs.js';
 import { h, clear, icon } from './ui/dom.js';
 import { stopAll } from './audio.js';
+import { ruleDataUri } from './ui/fretboard.js';
 import * as today from './ui/today.js';
 import * as session from './ui/session.js';
 import * as placement from './ui/placement.js';
@@ -31,6 +32,15 @@ export function boot(mount) {
   const hash = (location.hash || '').slice(1);
   if (SCREENS[hash] && hash !== 'session') route = { name: hash, params: {} };
 
+  // Shared drawing bits: pencil rules for section breaks, a wobble filter for icons, pencil hatching.
+  document.documentElement.style.setProperty('--rule-l', ruleDataUri('#4e525a'));
+  document.documentElement.style.setProperty('--rule-d', ruleDataUri('#8f8e86'));
+  const defs = document.createElement('div');
+  defs.setAttribute('aria-hidden', 'true');
+  defs.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+  defs.innerHTML = '<svg width="0" height="0"><defs><filter id="pencil-wobble"><feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="1.6"/></filter><pattern id="hatch-ink" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><line x1="0" y1="0" x2="0" y2="5" stroke="currentColor" stroke-width="1.5"/></pattern></defs></svg>';
+  defs.style.color = 'var(--ink-2)';
+  document.body.append(defs);
   const main = h('main#main', { tabindex: -1 });
   const nav = h('nav', { 'aria-label': 'Sections' });
   const bar = h('div.tabbar', nav);

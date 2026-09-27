@@ -139,6 +139,8 @@ export const PICKS = {
   slap: { name: 'Thumb slap', slots: [['B'], ['2', '1'], ['X'], ['2', '1'], ['A'], ['2', '1'], ['X'], ['2']], meter: 4, feel: 'Slap the strings with the side of your thumb on 2 and 4. The snare lives in your hand. Singer-songwriter percussive.' },
   sixTravis: { name: '6/8 Travis', slots: [['B'], ['2'], ['1'], ['A'], ['2'], ['1'], ['B'], ['2'], ['1'], ['A'], ['2'], ['1']], meter: 6, feel: 'Travis in two big beats per bar. Folk ballads and waltzy indie.' },
   boomChucka: { name: 'Boom-chucka', slots: [['B'], [], ['3', '2', '1'], ['3', '2', '1'], ['A'], [], ['3', '2', '1'], ['3', '2', '1']], meter: 4, feel: 'Bass, then a down-up flick with the fingers. Carter Family style, very driving.' },
+  crosspick: { name: 'Crosspicking roll', slots: [['B'], ['3'], ['2'], ['1'], ['3'], ['2'], ['1'], ['3']], meter: 4, feel: 'Three strings rolled in threes against a four-beat bar, so the accent keeps shifting. The chiming, jangly indie sound.' },
+  ringArp: { name: 'Ringing arpeggio', slots: [['B'], ['A'], ['3'], ['2'], ['1'], ['2'], ['3'], ['A']], meter: 4, feel: 'Up across five strings and back, letting every note ring into the next. Hold the chord down and don’t lift a finger.' },
   clawPinch: { name: 'Pinch & brush', slots: [['B', '1'], [], ['A'], ['3', '2', '1'], ['B'], ['2'], ['A'], ['3', '2', '1']], meter: 4, feel: 'Thumb bass with finger brushes. The singer-songwriter hybrid.' },
 };
 
@@ -229,6 +231,69 @@ export const FRIENDLY_KEYS = ['G', 'C', 'D', 'A', 'E'];
 // ---------------------------------------------------------------------------
 // Licks and melodies as tab. n: [string(0=low E), fret, beats, technique?]
 // technique: h hammer-on, p pull-off, s slide into, b bend up a whole step.
+// ---------------------------------------------------------------------------
+// Fingerstyle pieces: short originals, each built on one technique. Bars are eighth notes.
+// Token: string letter + fret (E3, e0), '+' for notes together, '-' to let ring, h/p suffix for hammer/pull.
+export const PIECES = {
+  ringing: {
+    name: 'Ringing arpeggios', key: 'G', scale: 'major', meter: 4, technique: 'letring',
+    about: 'Every note rings into the next, and the open B and e strings drone through all four chords. That shimmer is most of the sound of jangly 80s British indie.',
+    bars: [['Em', 'E0 D2 G0 B0 e0 B0 G0 D2'], ['Cmaj7', 'A3 D2 G0 B0 e0 B0 G0 D2'], ['G', 'E3 D0 G0 B0 e3 B0 G0 D0'], ['D/F♯', 'E2 D0 G2 B3 e0 B3 G2 D0']],
+  },
+  drone: {
+    name: 'Shapes over a drone', key: 'D', scale: 'major', meter: 4, technique: 'drone',
+    about: 'One small two-finger shape on the G and B strings slides up the neck while the open D and high e keep ringing underneath. Different chord, same drone. Johnny Marr built a style on tricks like this.',
+    bars: [['D', 'D0 G2+B3 e0 B3 D0 G2+B3 e0 G2'], ['Em/D', 'D0 G4+B5 e0 B5 D0 G4+B5 e0 G4'], ['G/D', 'D0 G7+B8 e0 B8 D0 G7+B8 e0 G7'], ['Dmaj7', 'D0 G6+B7 e0 B7 D0 G6+B7 e0 G6']],
+  },
+  crosspick: {
+    name: 'Crosspicking roll', key: 'C', scale: 'major', meter: 4, technique: 'crosspick',
+    about: 'The top three strings rolled in groups of three over a four-beat bar, so the pattern lands somewhere new each beat. Chiming and restless.',
+    bars: [['C', 'A3 G0 B1 e0 G0 B1 e0 G0'], ['Fmaj7', 'D3 G2 B1 e0 G2 B1 e0 G2'], ['Am', 'A0 G2 B1 e0 G2 B1 e0 G2'], ['G', 'E3 G0 B0 e3 G0 B0 e3 G0']],
+  },
+  hammer: {
+    name: 'Hammer-on arpeggios', key: 'A', scale: 'major', meter: 4, technique: 'legato',
+    about: 'Each arpeggio hides a hammer-on from the sus2 into the full chord. Pick once, let the fretting hand make the second note.',
+    bars: [['Asus2 → A', 'A0 D2 G2 B0 B2h e0 B2 G2'], ['Dadd9 → D', 'D0 G2 B3 e0 e2h B3 G2 B3'], ['E', 'E0 D2 G1 B0 e0 B0 G1 D2'], ['A', 'A0 D2 G2 B2 e0 B2 G2 D2']],
+  },
+  walking: {
+    name: 'Walking arpeggio', key: 'C', scale: 'major', meter: 4, technique: 'walks',
+    about: 'Arpeggios where the lowest note walks down a step each bar: C, B, A, G, F. The chords barely change shape; the bass does the storytelling.',
+    bars: [['C', 'A3 D2 G0 B1 e0 B1 G0 D2'], ['G/B', 'A2 D0 G0 B0 e3 B0 G0 D0'], ['Am', 'A0 D2 G2 B1 e0 B1 G2 D2'], ['Am/G', 'E3 D2 G2 B1 e0 B1 G2 D2'], ['Fmaj7', 'D3 G2 B1 e0 B1 G2 D3 G2'], ['G', 'E3 D0 G0 B0 e3 B0 G0 D0']],
+  },
+  pinchMelody: {
+    name: 'Bass and melody', key: 'G', scale: 'major', meter: 4, technique: 'topnote',
+    about: 'The thumb keeps the bass on the beat while the fingers play a tune on top, sometimes pinched together with the bass. This is what "fingerstyle arrangement" means.',
+    bars: [['G', 'E3+e3 - D0 B0 E3+e0 - D0+B3 -'], ['C', 'A3+e0 - D2 B1 A3+e3 - D2+B1 -'], ['D', 'D0+e2 - G2 B3 D0+e0 - G2+B3 -'], ['G', 'E3+B0 - D0 G0 E3+B0 - D0 -']],
+  },
+  waltz: {
+    name: 'Waltz arpeggio', key: 'D', scale: 'major', meter: 3, technique: 'letring',
+    about: 'Three beats to the bar, rising and falling. The last bar hides a hammer-on and pull-off on the top string.',
+    bars: [['D', 'D0 G2 B3 e2 B3 G2'], ['G', 'E3 D0 G0 B0 G0 D0'], ['A', 'A0 D2 G2 B2 G2 D2'], ['D', 'D0 G2 B3 e2 e3h e2p']],
+  },
+  shimmer: {
+    name: 'Open-string shimmer', key: 'A', scale: 'minor', meter: 4, technique: 'drone',
+    about: 'Minor chords made prettier by leaving strings open: A minor add9, F major 7 with a sharp 11, C add9, G6. The open B and e give every chord an extra colour.',
+    bars: [['Am add9', 'A0 D2 G2 B0 e0 B0 G2 D2'], ['Fmaj7♯11', 'D3 G2 B0 e0 B0 G2 D3 G2'], ['Cadd9', 'A3 D2 G0 B3 e0 B3 G0 D2'], ['G6', 'E3 D0 G0 B0 e0 B0 G0 D0']],
+  },
+};
+
+const STRING_OF = { E: 0, A: 1, D: 2, G: 3, B: 4, e: 5 };
+// Flatten a piece to eighth-note columns: [{notes:[{s,f,tech}], bar, chord, slot}]
+export function pieceColumns(piece) {
+  const cols = [];
+  piece.bars.forEach(([chord, bar], bi) => {
+    bar.trim().split(/\s+/).forEach((tok, si) => {
+      const notes = tok === '-' ? [] : tok.split('+').map((t) => {
+        const m = /^([EADGBe])(\d+)([hps]?)$/.exec(t);
+        if (!m) throw new Error('Bad tab token ' + t);
+        return { s: STRING_OF[m[1]], f: Number(m[2]), tech: m[3] || undefined };
+      });
+      cols.push({ notes, bar: bi, chord, slot: si });
+    });
+  });
+  return cols;
+}
+
 export const LICKS = {
   walkupGC: { name: 'Walk-up G to C', key: 'G', scale: 'major', n: [[0, 3, 1], [1, 0, 1], [1, 2, 1], [1, 3, 1]], use: 'Bass notes that lead from G to C. Drop it in on beat 4.' },
   walkdownCAm: { name: 'Walk-down C to Am', key: 'C', scale: 'major', n: [[1, 3, 1], [1, 2, 1], [1, 0, 2]], use: 'C, then B, then A. The classic songwriter move.' },
@@ -271,6 +336,9 @@ export const CHEATS = {
   pull: { title: 'Borrowed pull (secondary dominants)', body: 'Any chord can be approached by its own 5th chord with a 7th on it. Going to Am? Play E7 first. Going to Em? B7. That chord borrows one note from outside the key, a half step below the target, and it pulls like a magnet.', tip: 'Find the target, count up five letters, make it a 7th chord: Am → E7, C → G7, F → C7.' },
   cliche: { title: 'The line cliché', body: 'Hold a chord and move just one note inside it down a half step at a time: Am, Am(maj7), Am7, Am6. The rest of the chord stays. It sounds like a film soundtrack and your hand barely moves.', tip: 'On Am, only your ring finger on the G string moves: fret 2, fret 1, open.' },
   approach: { title: 'Approach notes', body: 'The note a half step below any root leans into it, even if it is not in the key. Play it on the last beat before the chord change and the change sounds deliberate.', tip: 'Going to Am? Play G# (6th string, fret 4) on beat 4.' },
+  letring: { title: 'Let it ring', body: 'Fingerpicking sounds pretty when notes overlap. Put the whole chord shape down before you pick, keep every finger down until the chord changes, and use open strings whenever you can. Pick one string at a time and let it sustain under the next.', tip: 'If a note stops early, a finger is leaning on the string next to it. Arch your fingers more.' },
+  drone: { title: 'Shapes over a drone', body: 'Keep one or two open strings ringing and move a small shape around above them. The open strings stay the same, so every new shape sounds related and shimmery. This is the heart of the jangly Johnny Marr and Smiths sound.', tip: 'In D: open D string and open e, with a two-finger shape on the G and B strings at frets 2-3, 4-5, 7-8.' },
+  crosspick: { title: 'Crosspicking', body: 'Roll across three strings in a repeating group of three (G, B, e, G, B, e…) while the bar counts in four. The pattern starts on a different string each beat, which makes it chime and ripple.', tip: 'Count "1 & 2 & 3 & 4 &" out loud and notice the G string lands on 1, then on the "&" of 2, then on 4.' },
   legato: { title: 'Hammer-ons and pull-offs', body: 'Pick once, then make a second note with the fretting hand alone: slam a finger down (hammer-on) or flick it off (pull-off). Smooth, pretty, and it frees the picking hand.', tip: 'Open D string, hammer onto fret 2. Pick once, hear two notes.' },
 };
 
@@ -363,6 +431,17 @@ export const ITEMS = [
   { id: 'lk-sparkleD', kind: 'lick', track: 'create', title: 'D sparkle hammer-on', cheat: 'legato', bpm: [60, 100], mins: 1, prereq: ['pk-travis'], data: { lick: 'sparkleD' } },
   { id: 'lk-hammerC', kind: 'lick', track: 'create', title: 'C hammer-on fill', bpm: [60, 100], mins: 1, prereq: ['lk-sparkleD'], data: { lick: 'hammerC' } },
   { id: 'ml-topnote', kind: 'pick', track: 'create', title: 'Top-note melody', cheat: 'topnote', bpm: [55, 85], mins: 2, prereq: ['pk-travis'], data: { pattern: 'pinch', chords: ['C', 'Cmaj7', 'Am', 'Am7'], melodyTop: true } },
+  // ---- Fingerstyle pieces
+  { id: 'pc-ringing', kind: 'piece', track: 'hands', title: 'Ringing arpeggios', cheat: 'letring', bpm: [50, 90], mins: 2, prereq: ['pk-arp'], data: { piece: 'ringing' } },
+  { id: 'pc-hammer', kind: 'piece', track: 'hands', title: 'Hammer-on arpeggios', bpm: [50, 88], mins: 2, prereq: ['pc-ringing'], data: { piece: 'hammer' } },
+  { id: 'pc-shimmer', kind: 'piece', track: 'hands', title: 'Open-string shimmer', bpm: [50, 88], mins: 2, prereq: ['pc-ringing'], data: { piece: 'shimmer' } },
+  { id: 'pc-walking', kind: 'piece', track: 'hands', title: 'Walking arpeggio', bpm: [50, 88], mins: 2, prereq: ['pc-ringing', 'lk-walkdown'], data: { piece: 'walking' } },
+  { id: 'pc-drone', kind: 'piece', track: 'hands', title: 'Shapes over a drone', cheat: 'drone', bpm: [50, 90], mins: 2, prereq: ['pc-ringing'], data: { piece: 'drone' } },
+  { id: 'pc-crosspick', kind: 'piece', track: 'hands', title: 'Crosspicking roll', cheat: 'crosspick', bpm: [50, 92], mins: 2, prereq: ['pc-ringing'], data: { piece: 'crosspick' } },
+  { id: 'pc-melody', kind: 'piece', track: 'hands', title: 'Bass and melody', bpm: [50, 85], mins: 2, prereq: ['pk-pinch'], data: { piece: 'pinchMelody' } },
+  { id: 'pc-waltz', kind: 'piece', track: 'hands', title: 'Waltz arpeggio', bpm: [60, 100], mins: 1.5, prereq: ['pc-hammer'], data: { piece: 'waltz' } },
+  { id: 'pk-crosspick', kind: 'pick', track: 'hands', title: 'Crosspicking pattern', bpm: [55, 95], mins: 1.5, prereq: ['pc-crosspick'], data: { pattern: 'crosspick', chords: ['G', 'Cadd9', 'Em7', 'Dsus4'] } },
+  { id: 'pk-ringarp', kind: 'pick', track: 'hands', title: 'Ringing arpeggio pattern', bpm: [55, 95], mins: 1.5, prereq: ['pc-ringing'], data: { pattern: 'ringArp', chords: ['Am', 'Fmaj7', 'C', 'G'] } },
   { id: 'ml-twinkle', kind: 'melody', track: 'create', title: 'Melody by ear: Twinkle', bpm: [60, 100], mins: 1.5, data: { melody: 'twinkle' } },
   { id: 'ml-ode', kind: 'melody', track: 'create', title: 'Melody by ear: Ode to Joy', bpm: [60, 100], mins: 1.5, prereq: ['ml-twinkle'], data: { melody: 'ode' } },
   { id: 'ml-grace', kind: 'melody', track: 'create', title: 'Melody by ear: Amazing Grace', bpm: [60, 95], mins: 1.5, prereq: ['ml-ode'], data: { melody: 'grace' } },
@@ -413,19 +492,19 @@ export const MILESTONES = [
   },
   {
     id: 'm2', name: 'Pretty chords', goal: 'Sparkle chords, anchor fingers, A-shape barres and the capo trick. Every progression you play sounds like a record.',
-    items: ['pk-sparkle', 'st-anchor', 'ch-abarre', 'pk-forward', 'pk-jangle', 'st-push', 'pr-sad', 'pr-britpop', 'pr-capo', 'nt-a', 'ear-int2', 'ear-prog1', 'lk-sparkleD', 'ml-twinkle', 'pk-switch', 'pk-rolling', 'pr-anchor'],
+    items: ['pk-sparkle', 'st-anchor', 'ch-abarre', 'pk-forward', 'pk-jangle', 'st-push', 'pr-sad', 'pr-britpop', 'pr-capo', 'nt-a', 'ear-int2', 'ear-prog1', 'lk-sparkleD', 'ml-twinkle', 'pk-switch', 'pk-rolling', 'pr-anchor', 'pc-ringing', 'pc-hammer', 'pc-shimmer', 'pk-ringarp'],
   },
   {
     id: 'm2b', name: 'Smooth changes', goal: 'Walk the bass between chords, use slash chords and passing chords, and make every change sound deliberate instead of just switching shapes.',
-    items: ['mv-walk-GEm', 'mv-walk-CG', 'mv-walk-DG', 'mv-walkup-CAm', 'mv-inv-CAm', 'mv-inv-GC', 'mv-inv-CF', 'mv-sec-CAm', 'mv-sec-GEm', 'mv-appr-GAm', 'mv-sus-DG', 'mv-cliche-Am', 'mv-fill-GC', 'pk-boomchucka', 'pr-canon'],
+    items: ['mv-walk-GEm', 'mv-walk-CG', 'mv-walk-DG', 'mv-walkup-CAm', 'mv-inv-CAm', 'mv-inv-GC', 'mv-inv-CF', 'mv-sec-CAm', 'mv-sec-GEm', 'mv-appr-GAm', 'mv-sus-DG', 'mv-cliche-Am', 'mv-fill-GC', 'pk-boomchucka', 'pr-canon', 'pc-walking'],
   },
   {
     id: 'm3', name: 'Know the neck', goal: 'Find any note on strings 6 and 5, jump octaves, and play minor and major pentatonic boxes in five keys.',
-    items: ['nt-oct', 'sc-pent1', 'sc-pent2', 'sc-maj-pent', 'sc-major', 'lk-boxrun', 'pk-syncop', 'pk-updown', 'ch-mixbarre', 'ear-q2', 'ear-bass', 'ml-ode', 'pr-bitter'],
+    items: ['nt-oct', 'sc-pent1', 'sc-pent2', 'sc-maj-pent', 'sc-major', 'lk-boxrun', 'pk-syncop', 'pk-updown', 'ch-mixbarre', 'ear-q2', 'ear-bass', 'ml-ode', 'pr-bitter', 'pc-drone'],
   },
   {
     id: 'm4', name: 'Noodle & write', goal: 'Pick up the guitar and fingerpick your own progression with a melody on top, fills between chords, and one borrowed chord.', isGoal: true,
-    items: ['ml-topnote', 'lk-hammerC', 'lk-triplets', 'wr-loop', 'wr-melody', 'wr-fill', 'pr-creep', 'pr-royal', 'ml-grace', 'pk-hybrid', 'ear-prog2', 'ear-sing', 'lk-target', 'pk-slap', 'pk-pinchroll', 'mv-cliche-D', 'mv-sec-CF', 'mv-inv-GEm', 'mv-anchor-GC', 'pr-andalusian', 'pr-dream'],
+    items: ['ml-topnote', 'lk-hammerC', 'lk-triplets', 'wr-loop', 'wr-melody', 'wr-fill', 'pr-creep', 'pr-royal', 'ml-grace', 'pk-hybrid', 'ear-prog2', 'ear-sing', 'lk-target', 'pk-slap', 'pk-pinchroll', 'mv-cliche-D', 'mv-sec-CF', 'mv-inv-GEm', 'mv-anchor-GC', 'pr-andalusian', 'pr-dream', 'pc-melody', 'pc-crosspick', 'pk-crosspick', 'pc-waltz'],
   },
   {
     id: 'm5', name: 'Solo over a jam', goal: 'Improvise over a backing track in any key: three pentatonic boxes, bends, slides and landing on chord tones.',
