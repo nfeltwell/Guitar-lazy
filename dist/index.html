@@ -240,6 +240,11 @@ input[type="range"] { width: 100%; accent-color: var(--red); }
 .nk-next { fill: none; stroke: var(--red); stroke-width: 1.4; stroke-dasharray: 3 3.5; opacity: .85; }
 .nk-pick { font: 700 18px var(--hand); fill: var(--red); }
 .nk-tap { fill: transparent; cursor: pointer; }
+.nk-route-base { fill: none; stroke: var(--ink-3); stroke-width: 1.3; stroke-dasharray: 3 4; stroke-linecap: round; opacity: .7; }
+.nk-route-arrow { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.nk-route-ink { fill: none; stroke: var(--red); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: .55; transition: stroke-dashoffset .18s linear; }
+.nk-route-next { fill: none; stroke: var(--red); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.nk-marker-hl { fill: var(--hl); opacity: var(--hl-op); mix-blend-mode: var(--hl-blend); }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 400 .98rem var(--hand); color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 
@@ -329,6 +334,9 @@ button.shape-cell { cursor: pointer; }
 .hf-stage { padding: 16px 2px; display: flex; flex-direction: column; gap: 10px; }
 .hf-stage .said { font: 700 1.9rem/1.1 var(--hand); min-height: 2.2em; }
 .ai-out { white-space: pre-wrap; font-size: .95rem; }
+.say { font: 400 1.25rem/1.3 var(--hand); min-height: 3.3em; }
+.say b { color: var(--red); }
+details.more { border-top: 1.2px dashed var(--line); padding-top: 10px; }
 .readout { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-height: 2.6rem; }
 .readout .big { font: 700 2rem/1 var(--hand); color: var(--red); }
 .readout span:last-child { font-size: .9rem; color: var(--ink-2); }
@@ -2750,6 +2758,101 @@ function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 'Fretbo
   root.append(dotLayer);
   const rings = svg('g', { class: 'nk-rings' });
   root.append(rings);
+  // Route: a pencil line with arrows through notes in playing order, inked in red as you go.
+  const routeLayer = svg('g', { class: 'nk-route' });
+  dotLayer.before(routeLayer);
+  root.route = (pts) => {
+    routeLayer.replaceChildren();
+    const P = pts.map((n) => [xCenter(n.f), y(n.s)]);
+    // Faint dashed route through every note, with one small arrow per distinct step.
+    let base = '';
+    let arrows = '';
+    const seen = new Set();
+    for (let i = 0; i + 1 < P.length; i++) {
+      const [x1, y1] = P[i];
+      const [x2, y2] = P[i + 1];
+      const len = Math.hypot(x2 - x1, y2 - y1);
+      if (len < 1) continue;
+      const k1 = `${pts[i].s}:${pts[i].f}>${pts[i + 1].s}:${pts[i + 1].f}`;
+      const k2 = `${pts[i + 1].s}:${pts[i + 1].f}>${pts[i].s}:${pts[i].f}`;
+      if (seen.has(k1) || seen.has(k2)) continue;
+      seen.add(k1);
+      base += wobblyPath(x1, y1, x2, y2, 0.8, seedOf(x1, y1, x2, y2)) + ' ';
+      if (len > 34) {
+        const ux = (x2 - x1) / len;
+        const uy = (y2 - y1) / len;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        arrows += `M${f1(mx - ux * 4 - uy * 3.5)},${f1(my - uy * 4 + ux * 3.5)} L${f1(mx + ux * 2)},${f1(my + uy * 2)} L${f1(mx - ux * 4 + uy * 3.5)},${f1(my - uy * 4 - ux * 3.5)} `;
+      }
+    }
+    // One continuous line for the red trail, so the dash reveal works across the whole route.
+    const cum = [0];
+    let ink = P.length ? `M${f1(P[0][0])},${f1(P[0][1])}` : '';
+    for (let i = 1; i < P.length; i++) {
+      cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+      ink += ` L${f1(P[i][0])},${f1(P[i][1])}`;
+    }
+    const total = cum[cum.length - 1] || 1;
+    const prog = svg('path', { d: ink, class: 'nk-route-ink', 'stroke-dasharray': `${f1(total)} ${f1(total + 10)}`, 'stroke-dashoffset': f1(total) });
+    const next = svg('path', { d: '', class: 'nk-route-next' });
+    routeLayer.append(svg('path', { d: base, class: 'nk-route-base' }), svg('path', { d: arrows, class: 'nk-route-arrow' }), prog, next);
+    return {
+      set: (i) => {
+        const k = Math.max(0, Math.min(i, P.length - 1));
+        prog.setAttribute('stroke-dashoffset', f1(total - cum[k]));
+        // A bold arrow from this note to the next one.
+        const a = P[k];
+        const b2 = P[k + 1];
+        if (!b2 || Math.hypot(b2[0] - a[0], b2[1] - a[1]) < 1) return next.setAttribute('d', '');
+        const len = Math.hypot(b2[0] - a[0], b2[1] - a[1]);
+        const ux = (b2[0] - a[0]) / len;
+        const uy = (b2[1] - a[1]) / len;
+        const sx = a[0] + ux * 17;
+        const sy = a[1] + uy * 17;
+        const ex = b2[0] - ux * 17;
+        const ey = b2[1] - uy * 17;
+        next.setAttribute('d', `M${f1(sx)},${f1(sy)} L${f1(ex)},${f1(ey)} M${f1(ex - ux * 7 - uy * 5)},${f1(ey - uy * 7 + ux * 5)} L${f1(ex)},${f1(ey)} L${f1(ex - ux * 7 + uy * 5)},${f1(ey - uy * 7 - ux * 5)}`);
+      },
+    };
+  };
+  // Marker: a highlighter ring that hops from note to note.
+  let marker = null;
+  let mAnim = 0;
+  root.marker = (n, ms = 160) => {
+    if (!n) {
+      marker?.remove();
+      marker = null;
+      return;
+    }
+    const tx = xCenter(n.f);
+    const ty = y(n.s);
+    if (!marker) {
+      marker = svg('g', { class: 'nk-marker' });
+      marker.append(svg('circle', { r: 16, class: 'nk-marker-hl' }), svg('path', { d: blobPath(0, 0, 16, 91, { open: true }), class: 'nk-ring' }));
+      marker.dataset.x = tx;
+      marker.dataset.y = ty;
+      marker.setAttribute('transform', `translate(${tx},${ty})`);
+      rings.append(marker);
+    }
+    const x0 = Number(marker.dataset.x);
+    const y0 = Number(marker.dataset.y);
+    const t0 = performance.now();
+    const id = ++mAnim;
+    const stepFn = (t) => {
+      if (id !== mAnim || !marker) return;
+      const k = Math.min(1, (t - t0) / ms);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const hop = Math.sin(Math.PI * k) * Math.min(10, Math.hypot(tx - x0, ty - y0) * 0.2);
+      marker.setAttribute('transform', `translate(${f1(x0 + (tx - x0) * e)},${f1(y0 + (ty - y0) * e - hop)})`);
+      if (k < 1) requestAnimationFrame(stepFn);
+    };
+    marker.dataset.x = tx;
+    marker.dataset.y = ty;
+    if (ms <= 0 || typeof requestAnimationFrame === 'undefined') marker.setAttribute('transform', `translate(${tx},${ty})`);
+    else requestAnimationFrame(stepFn);
+    root.scrollToFret(n.f, { smooth: true, margin: 0.35 });
+  };
   if (onTap) {
     const taps = svg('g');
     for (let s = 0; s < 6; s++)
@@ -4632,15 +4735,16 @@ function suggestedPairs(key) {
 return { MOVE_TYPES, bassPos, generateMoves, moveBySpec, plainChange, moveColumns, eventNotes, moveShapes, suggestedPairs };
 };
 __defs["ui/scaleTrainer.js"] = () => {
-// Scale practice: shows the order to play a position in, which finger to use, and plays along.
+// Scale practice, kept simple: the route is drawn on the neck, "Show me" animates it note by note,
+// "Play along" does it at your speed. Everything technical lives under "More options".
 const { h, btn, seg, setBtn } = __req("ui/dom.js");
 const { neck, noteLabel, legend } = __req("ui/fretboard.js");
 const A = __req("audio.js");
 const { scalePosition, SCALES, usesFlats, fretMidi } = __req("theory.js");
 const PATTERNS = {
-  updown: { name: 'Up & down', how: 'Lowest note to highest, then back down. Learn the shape first.' },
-  threes: { name: 'In 3s', how: '1-2-3, 2-3-4, 3-4-5… up, then the same coming down. Breaks the "just running up and down" habit.' },
-  fours: { name: 'In 4s', how: '1-2-3-4, 2-3-4-5… Makes the shape feel like music, not a ladder.' },
+  updown: { name: 'Up & down', how: 'Lowest note to highest, then back down.' },
+  threes: { name: 'In 3s', how: '1-2-3, 2-3-4, 3-4-5… up, then the same coming down.' },
+  fours: { name: 'In 4s', how: '1-2-3-4, 2-3-4-5… and back down.' },
   thirds: { name: 'Thirds', how: 'Skip a note each time: 1-3, 2-4, 3-5… This is where melodies come from.' },
 };
 
@@ -4651,19 +4755,19 @@ function scaleSequence(asc, pattern) {
   const rev = asc.slice().reverse();
   if (pattern === 'threes' || pattern === 'fours') {
     const g = pattern === 'threes' ? 3 : 4;
-    for (let i = 0; i + g <= asc.length; i++) up.push(...asc.slice(i, i + g).map((n, k) => ({ ...n, i: asc.indexOf(n), group: k === 0 })));
-    for (let i = 0; i + g <= rev.length; i++) down.push(...rev.slice(i, i + g).map((n, k) => ({ ...n, i: asc.indexOf(n), group: k === 0 })));
+    for (let i = 0; i + g <= asc.length; i++) up.push(...asc.slice(i, i + g).map((n) => ({ ...n, i: asc.indexOf(n) })));
+    for (let i = 0; i + g <= rev.length; i++) down.push(...rev.slice(i, i + g).map((n) => ({ ...n, i: asc.indexOf(n) })));
     return [...up, ...down];
   }
   if (pattern === 'thirds') {
-    for (let i = 0; i + 2 < asc.length; i++) up.push({ ...asc[i], i, group: true }, { ...asc[i + 2], i: i + 2 });
-    for (let i = 0; i + 2 < rev.length; i++) down.push({ ...rev[i], i: asc.indexOf(rev[i]), group: true }, { ...rev[i + 2], i: asc.indexOf(rev[i + 2]) });
+    for (let i = 0; i + 2 < asc.length; i++) up.push({ ...asc[i], i }, { ...asc[i + 2], i: i + 2 });
+    for (let i = 0; i + 2 < rev.length; i++) down.push({ ...rev[i], i: asc.indexOf(rev[i]) }, { ...rev[i + 2], i: asc.indexOf(rev[i + 2]) });
     return [...up, ...down];
   }
   return [...asc.map((n, i) => ({ ...n, i })), ...rev.slice(1).map((n) => ({ ...n, i: asc.indexOf(n) }))];
 }
 
-// One finger per fret from the lowest fretted note of the position; the pinky stretches for a fifth fret.
+// One finger per fret from the lowest fretted note of the position; the little finger stretches for a fifth fret.
 function fingerFor(asc) {
   const fretted = asc.filter((n) => n.f > 0).map((n) => n.f);
   const base = fretted.length ? Math.min(...fretted) : 1;
@@ -4672,7 +4776,10 @@ function fingerFor(asc) {
   return map;
 }
 
-const STRINGS = ['low E', 'A', 'D', 'G', 'B', 'high e'];
+const STRING = ['low E string', 'A string', 'D string', 'G string', 'B string', 'high e string'];
+const FINGER = ['open', 'first finger', 'second finger', 'third finger', 'little finger'];
+const ordinal = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+const SPEEDS = { slow: 50, medium: 70, fast: 92 };
 
 function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) {
   const flats = usesFlats(key);
@@ -4683,98 +4790,99 @@ function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) {
   const to = Math.max(from + 4, Math.max(...fs) + 1);
   let pattern = 'updown';
   let labels = 'order';
-  let mode = null; // 'play' | 'step'
+  let mode = null; // 'demo' | 'play' | 'step'
   let idx = -1;
   let speed = false;
   let seq = scaleSequence(asc, pattern);
-  const wrap = h('div.nk-wrap');
-  const readout = h('div.readout', { 'aria-live': 'polite' });
+  let route = null;
   let board = null;
+  const wrap = h('div.nk-wrap');
+  const say = h('p.say', { 'aria-live': 'polite' });
   const kindOf = (n) => (n.degree === '1' ? 'root' : n.degree === '3' || n.degree === 'b3' ? 'third' : n.degree === '5' ? 'fifth' : n.degree === 'b5' ? 'blue' : 'scale');
-  const labelOf = (n, i) => (labels === 'order' ? i + 1 : labels === 'finger' ? fingers.get(n.s + ':' + n.f) || 'o' : labels === 'degree' ? n.degree : noteLabel(n.s, n.f, flats));
+  const labelOf = (n, i) => (labels === 'order' ? i + 1 : labels === 'finger' ? fingers.get(n.s + ':' + n.f) || 'o' : labels === 'degree' ? n.degree : labels === 'note' ? noteLabel(n.s, n.f, flats) : '');
+  const where = (n) => {
+    const fi = fingers.get(n.s + ':' + n.f);
+    return n.f === 0 ? `${STRING[n.s]}, open` : `${STRING[n.s]}, ${ordinal(n.f)} fret, ${FINGER[fi]}`;
+  };
   const draw = () => {
     board = neck({ from: from === 0 ? 0 : from, to, dots: asc.map((n, i) => ({ s: n.s, f: n.f, kind: kindOf(n), label: labelOf(n, i) })), label: `${key} ${SCALES[scaleId].name} position ${position + 1}`, focus: from });
     wrap.replaceChildren(board);
-    show();
+    route = board.route(seq);
+    rest();
   };
-  const show = () => {
-    if (idx < 0) {
-      readout.replaceChildren(h('span.big', `${asc.length} notes`), h('span', `${PATTERNS[pattern].how} Numbers on the dots are the order going up.`));
-      board?.highlight(seq[0] ? [{ ...seq[0], next: true }] : []);
-      return;
-    }
-    const n = seq[idx % seq.length];
-    const nx = seq[(idx + 1) % seq.length];
-    board.highlight([{ s: n.s, f: n.f }, { s: nx.s, f: nx.f, next: true }]);
-    const fi = fingers.get(n.s + ':' + n.f);
-    readout.replaceChildren(h('span.big', `${(idx % seq.length) + 1}/${seq.length}`), h('span', `${STRINGS[n.s]} string · fret ${n.f} · ${fi ? 'finger ' + fi : 'open'} · ${n.degree === '1' ? 'root' : n.degree}`));
+  const rest = () => {
+    if (!board) return;
+    route?.set(0);
+    board.marker(seq[0], 0);
+    say.replaceChildren(h('b', 'Start here: '), where(seq[0]), '. Follow the arrows.');
   };
-  const labelsSeg = h('div');
-  const patSeg = h('div');
-  const drawSegs = () => {
-    patSeg.replaceChildren(seg(Object.entries(PATTERNS).map(([v, p]) => ({ value: v, label: p.name })), pattern, (v) => {
-      pattern = v;
-      seq = scaleSequence(asc, pattern);
-      stop();
-      drawSegs();
-      show();
-    }, { label: 'Order', id: 'st-pattern', wide: true }));
-    labelsSeg.replaceChildren(seg([{ value: 'order', label: 'Order' }, { value: 'finger', label: 'Finger' }, { value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], labels, (v) => {
-      labels = v;
-      drawSegs();
-      draw();
-    }, { label: 'Dot labels', id: 'st-labels', wide: true }));
+  const at = (i, ms) => {
+    idx = i;
+    const n = seq[i % seq.length];
+    board.marker(n, ms);
+    route.set(i % seq.length);
+    say.replaceChildren(h('b', `${(i % seq.length) + 1} of ${seq.length}: `), where(n));
   };
-  const playB = btn('Play along', () => (mode === 'play' ? stop() : play()), { cls: 'primary', ico: 'play', id: 'st-play' });
-  const stepB = btn('Step by step', () => {
-    if (mode !== 'step') {
-      stop();
-      mode = 'step';
-      idx = -1;
-      stepB.classList.add('on');
-      nextB.hidden = false;
-      backB.hidden = false;
-    }
-    step(1);
-  }, { cls: 'quiet', id: 'st-step' });
+
+  const showB = btn('Show me', () => (mode === 'demo' ? stop() : demo()), { cls: 'primary', ico: 'play', id: 'st-show' });
+  const playB = btn('Play along', () => (mode === 'play' ? stop() : play()), { cls: 'quiet', ico: 'play', id: 'st-play' });
   const nextB = btn('Next note', () => step(1), { cls: 'primary big', id: 'st-next' });
   const backB = btn('Back', () => step(-1), { cls: 'ghost small' });
   nextB.hidden = true;
   backB.hidden = true;
-  const speedB = btn('Speed trainer: off', () => {
-    speed = !speed;
-    speedB.classList.toggle('on', speed);
-    setBtn(speedB, speed ? 'Speed trainer: on' : 'Speed trainer: off');
-  }, { cls: 'quiet small', id: 'st-speed' });
-  function step(d) {
-    idx = Math.max(0, idx + d);
-    const n = seq[idx % seq.length];
-    A.pluck(fretMidi(n.s, n.f), A.now(), { vel: 0.65, dur: 0.9 });
-    show();
-  }
+
   function stop() {
     A.stopAll();
     mode = null;
     idx = -1;
-    playB.classList.remove('on');
-    stepB.classList.remove('on');
+    setBtn(showB, 'Show me', 'play');
     setBtn(playB, 'Play along', 'play');
+    showB.classList.remove('on');
+    playB.classList.remove('on');
     nextB.hidden = true;
     backB.hidden = true;
-    show();
+    rest();
   }
+
+  // Slow demo: one note at a time with sound, the marker hops, the route inks in.
+  function demo() {
+    stop();
+    mode = 'demo';
+    showB.classList.add('on');
+    setBtn(showB, 'Stop', 'stop');
+    const beat = 60 / 64; // about one note a second
+    const loop = new A.Loop({
+      bpm: 64,
+      stepsPerBeat: 1,
+      length: seq.length + 1,
+      loop: false,
+      onStep: (i, t) => {
+        const n = seq[i];
+        if (n) A.pluck(fretMidi(n.s, n.f), t, { vel: 0.62, dur: beat * 0.95 });
+      },
+      onVisual: (i) => {
+        if (mode !== 'demo') return;
+        if (i < seq.length) at(i, 260);
+      },
+      onEnd: () => {
+        if (mode !== 'demo') return;
+        stop();
+        say.replaceChildren(h('b', 'Your turn. '), 'Press Play along and play with it, or Show me again.');
+      },
+    });
+    A.own(loop);
+  }
+
+  // Play along at your speed, after a count of four.
   function play() {
     stop();
     mode = 'play';
     playB.classList.add('on');
     setBtn(playB, 'Stop', 'stop');
     const bpm = getBpm();
-    const triplet = pattern === 'threes';
-    const per = triplet ? 3 : 2; // notes per beat
+    const per = pattern === 'threes' ? 3 : 2;
     const countIn = 4 * per;
-    const notes = seq.map((n) => [n.s, n.f, 1 / per]);
-    // one bar of count-in clicks, then the run
-    const events = [...Array(countIn).fill(null), ...notes];
+    const events = [...Array(countIn).fill(null), ...seq];
     const loop = new A.Loop({
       bpm,
       stepsPerBeat: per,
@@ -4783,7 +4891,7 @@ function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) {
       onStep: (i, t) => {
         if (i % per === 0) A.click(t, i === 0 || i === countIn);
         const e = events[i];
-        if (e) A.pluck(fretMidi(e[0], e[1]), t, { vel: 0.55, dur: (60 / bpm / per) * 0.95 });
+        if (e) A.pluck(fretMidi(e.s, e.f), t, { vel: 0.55, dur: (60 / bpm / per) * 0.95 });
         if (speed && i === events.length - 1) {
           loop.setBpm(loop.bpm + 4);
           onBpm && onBpm(loop.bpm);
@@ -4792,35 +4900,75 @@ function scaleTrainer({ key, scaleId, position, getBpm, onBpm, rootPc }) {
       onVisual: (i) => {
         if (mode !== 'play') return;
         if (i < countIn) {
-          idx = -1;
-          readout.replaceChildren(h('span.big', String(4 - Math.floor(i / per))), h('span', 'Count in… start on the first lit note.'));
-          board.highlight([{ ...seq[0], next: true }]);
-        } else {
-          idx = i - countIn;
-          show();
-        }
+          if (i % per === 0) {
+            board.marker(seq[0], 0);
+            route.set(0);
+            say.replaceChildren(h('b', `${4 - i / per}… `), 'get ready on the ', where(seq[0]));
+          }
+        } else at(i - countIn, Math.min(140, (60000 / bpm / per) * 0.8));
       },
     });
     A.own(loop);
   }
+
+  function step(d) {
+    idx = Math.max(0, idx + d);
+    const n = seq[idx % seq.length];
+    A.pluck(fretMidi(n.s, n.f), A.now(), { vel: 0.65, dur: 0.9 });
+    at(idx, 220);
+  }
+
+  // More options
+  const patSeg = h('div');
+  const labelsSeg = h('div');
+  const drawSegs = () => {
+    patSeg.replaceChildren(seg(Object.entries(PATTERNS).map(([v, p]) => ({ value: v, label: p.name })), pattern, (v) => {
+      pattern = v;
+      seq = scaleSequence(asc, pattern);
+      stop();
+      drawSegs();
+      route = board.route(seq);
+      rest();
+    }, { label: 'Order', id: 'st-pattern', wide: true }));
+    labelsSeg.replaceChildren(seg([{ value: 'order', label: 'Order' }, { value: 'finger', label: 'Finger' }, { value: 'note', label: 'C D E' }, { value: 'degree', label: '1 2 3' }], labels, (v) => {
+      labels = v;
+      drawSegs();
+      draw();
+    }, { label: 'Dot labels', id: 'st-labels', wide: true }));
+  };
+  const stepB = btn('Step through it myself', () => {
+    stop();
+    mode = 'step';
+    nextB.hidden = false;
+    backB.hidden = false;
+    step(1);
+  }, { cls: 'quiet small', id: 'st-step' });
+  const speedB = btn('Speed up each lap: off', () => {
+    speed = !speed;
+    speedB.classList.toggle('on', speed);
+    setBtn(speedB, speed ? 'Speed up each lap: on' : 'Speed up each lap: off');
+  }, { cls: 'quiet small', id: 'st-speed' });
   drawSegs();
   draw();
-  const el = h(
-    'div.trainer.stack',
-    patSeg,
-    readout,
-    wrap,
-    h('div.row', playB, stepB, speedB),
-    h('div.row', nextB, backB),
-    labelsSeg,
-    legend(scaleId === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
-    h('details.small', h('summary', 'How to practise a scale (when you’re rubbish at them)'), h('ol.small', { style: { margin: '8px 0 0', paddingLeft: '20px' } }, h('li', 'Step by step first. Say the number or the degree out loud as you play each note.'), h('li', 'One finger per fret. The finger numbers are on the dots; switch the labels to Finger.'), h('li', 'Alternate picking: down, up, down, up, even across strings.'), h('li', 'Play along slowly. Clean and even beats fast and messy. Speed trainer adds 4 bpm after each clean pass.'), h('li', 'Once it’s in your hands, switch to In 3s or Thirds. That’s when it starts sounding like music.'))),
+  const more = h(
+    'details.more',
+    h('summary', 'More options'),
+    h(
+      'div.stack',
+      { style: { marginTop: '10px' } },
+      h('div.field', h('span.field-label', 'order'), patSeg),
+      h('div.field', h('span.field-label', 'numbers on the dots'), labelsSeg),
+      h('div.row', stepB, speedB),
+      legend(scaleId === 'blues' ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
+      h('ol.small', { style: { margin: 0, paddingLeft: '20px' } }, h('li', 'Watch Show me once or twice. Then Play along slowly.'), h('li', 'One finger per fret: first finger on the lowest fret of the shape.'), h('li', 'Pick down, up, down, up, even when you change string.'), h('li', 'Clean and slow beats fast and messy. When it’s easy, try In 3s.')),
+    ),
   );
+  const el = h('div.trainer.stack', h('div.row', showB, playB), say, wrap, h('div.row', nextB, backB), more);
   el.stop = stop;
   return el;
 }
 
-return { PATTERNS, scaleSequence, fingerFor, scaleTrainer };
+return { PATTERNS, scaleSequence, fingerFor, SPEEDS, scaleTrainer };
 };
 __defs["ai.js"] = () => {
 // Optional AI extras through the artifact's `sample` capability. Everything works without them.
@@ -5312,11 +5460,11 @@ __defs["ui/neck.js"] = () => {
 const { h, btn, seg, select, field } = __req("ui/dom.js");
 const { neck, chordBox, noteLabel, legend, degreeKind } = __req("ui/fretboard.js");
 const { scaleKind } = __req("ui/items.js");
-const { scaleTrainer } = __req("ui/scaleTrainer.js");
+const { scaleTrainer, SPEEDS } = __req("ui/scaleTrainer.js");
 const A = __req("audio.js");
 const { SCALES, CHORDS, pc, noteName, usesFlats, scalePosition, allScaleNotes, findVoicings, identifyChord, fretMidi, TUNING, prettyChord } = __req("theory.js");
 const { SHAPES } = __req("content.js");
-let ui = { mode: 'scales', view: 'look', bpm: 70, key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
+let ui = { mode: 'scales', view: 'look', speed: 'slow', key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
 const ROOTS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 const QUALS = ['', 'm', '7', 'maj7', 'm7', 'sus2', 'sus4', 'add9', '6', 'm6', '5', 'dim', 'aug', '7sus4', 'madd9', 'm7b5'];
 const PARENT = { majPent: 'major', minPent: 'minor', blues: 'minor' };
@@ -5369,19 +5517,16 @@ function scales(body) {
   }, { label: 'Look or practise', id: 'sc-view', wide: true }));
   if (ui.view === 'practise') {
     if (ui.pos < 0) ui.pos = 0;
-    const bpmLabel = h('span.mono', String(ui.bpm));
-    const slider = h('input', { type: 'range', min: 40, max: 160, step: 2, value: ui.bpm, id: 'sc-bpm', 'aria-label': 'Tempo', oninput: (e) => ((ui.bpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)) });
-    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => ui.bpm, onBpm: (b) => {
-      ui.bpm = b;
-      slider.value = b;
-      bpmLabel.textContent = String(b);
-    } });
+    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => SPEEDS[ui.speed] });
+    const speedSeg = h('div');
+    const drawSpeed = () => speedSeg.replaceChildren(seg([{ value: 'slow', label: 'Slow' }, { value: 'medium', label: 'Medium' }, { value: 'fast', label: 'Fast' }], ui.speed, (v) => ((ui.speed = v), drawSpeed()), { label: 'Play-along speed', id: 'sc-speed', wide: true }));
+    drawSpeed();
     body.append(
       viewSeg,
       h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
       field('position', seg(Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) })), ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
-      field('tempo', h('div.row.nowrap', slider, bpmLabel)),
       trainer,
+      field('play-along speed', speedSeg),
     );
     return;
   }

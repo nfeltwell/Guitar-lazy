@@ -238,6 +238,11 @@ input[type="range"] { width: 100%; accent-color: var(--red); }
 .nk-next { fill: none; stroke: var(--red); stroke-width: 1.4; stroke-dasharray: 3 3.5; opacity: .85; }
 .nk-pick { font: 700 18px var(--hand); fill: var(--red); }
 .nk-tap { fill: transparent; cursor: pointer; }
+.nk-route-base { fill: none; stroke: var(--ink-3); stroke-width: 1.3; stroke-dasharray: 3 4; stroke-linecap: round; opacity: .7; }
+.nk-route-arrow { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.nk-route-ink { fill: none; stroke: var(--red); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: .55; transition: stroke-dashoffset .18s linear; }
+.nk-route-next { fill: none; stroke: var(--red); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.nk-marker-hl { fill: var(--hl); opacity: var(--hl-op); mix-blend-mode: var(--hl-blend); }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 400 .98rem var(--hand); color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 
@@ -327,6 +332,9 @@ button.shape-cell { cursor: pointer; }
 .hf-stage { padding: 16px 2px; display: flex; flex-direction: column; gap: 10px; }
 .hf-stage .said { font: 700 1.9rem/1.1 var(--hand); min-height: 2.2em; }
 .ai-out { white-space: pre-wrap; font-size: .95rem; }
+.say { font: 400 1.25rem/1.3 var(--hand); min-height: 3.3em; }
+.say b { color: var(--red); }
+details.more { border-top: 1.2px dashed var(--line); padding-top: 10px; }
 .readout { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-height: 2.6rem; }
 .readout .big { font: 700 2rem/1 var(--hand); color: var(--red); }
 .readout span:last-child { font-size: .9rem; color: var(--ink-2); }

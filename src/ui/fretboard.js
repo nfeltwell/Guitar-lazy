@@ -254,6 +254,101 @@ export function neck({ from = 0, to = 12, dots = [], muted = [], onTap, label = 
   root.append(dotLayer);
   const rings = svg('g', { class: 'nk-rings' });
   root.append(rings);
+  // Route: a pencil line with arrows through notes in playing order, inked in red as you go.
+  const routeLayer = svg('g', { class: 'nk-route' });
+  dotLayer.before(routeLayer);
+  root.route = (pts) => {
+    routeLayer.replaceChildren();
+    const P = pts.map((n) => [xCenter(n.f), y(n.s)]);
+    // Faint dashed route through every note, with one small arrow per distinct step.
+    let base = '';
+    let arrows = '';
+    const seen = new Set();
+    for (let i = 0; i + 1 < P.length; i++) {
+      const [x1, y1] = P[i];
+      const [x2, y2] = P[i + 1];
+      const len = Math.hypot(x2 - x1, y2 - y1);
+      if (len < 1) continue;
+      const k1 = `${pts[i].s}:${pts[i].f}>${pts[i + 1].s}:${pts[i + 1].f}`;
+      const k2 = `${pts[i + 1].s}:${pts[i + 1].f}>${pts[i].s}:${pts[i].f}`;
+      if (seen.has(k1) || seen.has(k2)) continue;
+      seen.add(k1);
+      base += wobblyPath(x1, y1, x2, y2, 0.8, seedOf(x1, y1, x2, y2)) + ' ';
+      if (len > 34) {
+        const ux = (x2 - x1) / len;
+        const uy = (y2 - y1) / len;
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        arrows += `M${f1(mx - ux * 4 - uy * 3.5)},${f1(my - uy * 4 + ux * 3.5)} L${f1(mx + ux * 2)},${f1(my + uy * 2)} L${f1(mx - ux * 4 + uy * 3.5)},${f1(my - uy * 4 - ux * 3.5)} `;
+      }
+    }
+    // One continuous line for the red trail, so the dash reveal works across the whole route.
+    const cum = [0];
+    let ink = P.length ? `M${f1(P[0][0])},${f1(P[0][1])}` : '';
+    for (let i = 1; i < P.length; i++) {
+      cum.push(cum[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+      ink += ` L${f1(P[i][0])},${f1(P[i][1])}`;
+    }
+    const total = cum[cum.length - 1] || 1;
+    const prog = svg('path', { d: ink, class: 'nk-route-ink', 'stroke-dasharray': `${f1(total)} ${f1(total + 10)}`, 'stroke-dashoffset': f1(total) });
+    const next = svg('path', { d: '', class: 'nk-route-next' });
+    routeLayer.append(svg('path', { d: base, class: 'nk-route-base' }), svg('path', { d: arrows, class: 'nk-route-arrow' }), prog, next);
+    return {
+      set: (i) => {
+        const k = Math.max(0, Math.min(i, P.length - 1));
+        prog.setAttribute('stroke-dashoffset', f1(total - cum[k]));
+        // A bold arrow from this note to the next one.
+        const a = P[k];
+        const b2 = P[k + 1];
+        if (!b2 || Math.hypot(b2[0] - a[0], b2[1] - a[1]) < 1) return next.setAttribute('d', '');
+        const len = Math.hypot(b2[0] - a[0], b2[1] - a[1]);
+        const ux = (b2[0] - a[0]) / len;
+        const uy = (b2[1] - a[1]) / len;
+        const sx = a[0] + ux * 17;
+        const sy = a[1] + uy * 17;
+        const ex = b2[0] - ux * 17;
+        const ey = b2[1] - uy * 17;
+        next.setAttribute('d', `M${f1(sx)},${f1(sy)} L${f1(ex)},${f1(ey)} M${f1(ex - ux * 7 - uy * 5)},${f1(ey - uy * 7 + ux * 5)} L${f1(ex)},${f1(ey)} L${f1(ex - ux * 7 + uy * 5)},${f1(ey - uy * 7 - ux * 5)}`);
+      },
+    };
+  };
+  // Marker: a highlighter ring that hops from note to note.
+  let marker = null;
+  let mAnim = 0;
+  root.marker = (n, ms = 160) => {
+    if (!n) {
+      marker?.remove();
+      marker = null;
+      return;
+    }
+    const tx = xCenter(n.f);
+    const ty = y(n.s);
+    if (!marker) {
+      marker = svg('g', { class: 'nk-marker' });
+      marker.append(svg('circle', { r: 16, class: 'nk-marker-hl' }), svg('path', { d: blobPath(0, 0, 16, 91, { open: true }), class: 'nk-ring' }));
+      marker.dataset.x = tx;
+      marker.dataset.y = ty;
+      marker.setAttribute('transform', `translate(${tx},${ty})`);
+      rings.append(marker);
+    }
+    const x0 = Number(marker.dataset.x);
+    const y0 = Number(marker.dataset.y);
+    const t0 = performance.now();
+    const id = ++mAnim;
+    const stepFn = (t) => {
+      if (id !== mAnim || !marker) return;
+      const k = Math.min(1, (t - t0) / ms);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const hop = Math.sin(Math.PI * k) * Math.min(10, Math.hypot(tx - x0, ty - y0) * 0.2);
+      marker.setAttribute('transform', `translate(${f1(x0 + (tx - x0) * e)},${f1(y0 + (ty - y0) * e - hop)})`);
+      if (k < 1) requestAnimationFrame(stepFn);
+    };
+    marker.dataset.x = tx;
+    marker.dataset.y = ty;
+    if (ms <= 0 || typeof requestAnimationFrame === 'undefined') marker.setAttribute('transform', `translate(${tx},${ty})`);
+    else requestAnimationFrame(stepFn);
+    root.scrollToFret(n.f, { smooth: true, margin: 0.35 });
+  };
   if (onTap) {
     const taps = svg('g');
     for (let s = 0; s < 6; s++)

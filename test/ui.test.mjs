@@ -183,22 +183,29 @@ test('moves: every connection plays, and one can be added to practice', { skip }
   await ctx.close();
 });
 
-test('neck: scale practice shows the order and steps through it', { skip }, async () => {
+test('neck: scale practice draws the route and animates it', { skip }, async () => {
   const { page, ctx, errors } = await open();
   await page.click('#tab-neck');
   await page.click('#sc-view button:has-text("Practise it")');
-  assert.match(await page.textContent('.readout'), /12 notes/);
-  await page.click('#st-step');
-  assert.match(await page.textContent('.readout'), /^1\/23/);
-  await page.click('#st-next');
-  assert.match(await page.textContent('.readout'), /^2\/23/);
-  assert.ok((await page.locator('.nk-ring').count()) >= 1, 'current note is ringed');
-  assert.ok((await page.locator('.nk-next').count()) >= 1, 'next note is marked');
-  await page.click('#st-pattern button:has-text("In 3s")');
+  assert.match(await page.textContent('.say'), /Start here: low E string, 5th fret, first finger/);
+  assert.ok((await page.locator('.nk-route-base').count()) === 1, 'route drawn');
+  assert.ok((await page.locator('.nk-marker').count()) === 1, 'marker waiting on the first note');
+  await page.click('#st-show');
+  await page.waitForTimeout(2300);
+  assert.match(await page.textContent('.say'), /^\d+ of 23: /);
+  const offset = await page.evaluate(() => Number(document.querySelector('.nk-route-ink').getAttribute('stroke-dashoffset')));
+  const total = await page.evaluate(() => Number(document.querySelector('.nk-route-ink').getAttribute('stroke-dasharray').split(' ')[0]));
+  assert.ok(offset < total, 'route inks in as it plays');
+  await page.click('#st-show');
   await page.click('#st-play');
   await page.waitForTimeout(300);
-  assert.match(await page.textContent('.readout'), /Count in|\d+\//);
+  assert.match(await page.textContent('.say'), /get ready|of 23/);
   await page.click('#st-play');
+  await page.click('details.more summary');
+  await page.click('#st-step');
+  assert.match(await page.textContent('.say'), /^1 of 23: /);
+  await page.click('#st-next');
+  assert.match(await page.textContent('.say'), /^2 of 23: /);
   await noHorizontalScroll(page, 'scale trainer');
   await page.screenshot({ path: join(SHOTS, 'scale-trainer.png'), fullPage: true });
   assert.deepEqual(errors, []);

@@ -2,12 +2,12 @@
 import { h, btn, seg, select, field } from './dom.js';
 import { neck, chordBox, noteLabel, legend, degreeKind } from './fretboard.js';
 import { scaleKind } from './items.js';
-import { scaleTrainer } from './scaleTrainer.js';
+import { scaleTrainer, SPEEDS } from './scaleTrainer.js';
 import * as A from '../audio.js';
 import { SCALES, CHORDS, pc, noteName, usesFlats, scalePosition, allScaleNotes, findVoicings, identifyChord, fretMidi, TUNING, prettyChord } from '../theory.js';
 import { SHAPES } from '../content.js';
 
-let ui = { mode: 'scales', view: 'look', bpm: 70, key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
+let ui = { mode: 'scales', view: 'look', speed: 'slow', key: 'A', scale: 'minPent', pos: -1, labels: 'degree', overlay: 'none', root: 'C', quality: '', frets: [-1, -1, -1, -1, -1, -1], naturals: true };
 const ROOTS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 const QUALS = ['', 'm', '7', 'maj7', 'm7', 'sus2', 'sus4', 'add9', '6', 'm6', '5', 'dim', 'aug', '7sus4', 'madd9', 'm7b5'];
 const PARENT = { majPent: 'major', minPent: 'minor', blues: 'minor' };
@@ -60,19 +60,16 @@ function scales(body) {
   }, { label: 'Look or practise', id: 'sc-view', wide: true }));
   if (ui.view === 'practise') {
     if (ui.pos < 0) ui.pos = 0;
-    const bpmLabel = h('span.mono', String(ui.bpm));
-    const slider = h('input', { type: 'range', min: 40, max: 160, step: 2, value: ui.bpm, id: 'sc-bpm', 'aria-label': 'Tempo', oninput: (e) => ((ui.bpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)) });
-    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => ui.bpm, onBpm: (b) => {
-      ui.bpm = b;
-      slider.value = b;
-      bpmLabel.textContent = String(b);
-    } });
+    const trainer = scaleTrainer({ key: ui.key, scaleId: ui.scale, position: ui.pos, rootPc: pc(ui.key), getBpm: () => SPEEDS[ui.speed] });
+    const speedSeg = h('div');
+    const drawSpeed = () => speedSeg.replaceChildren(seg([{ value: 'slow', label: 'Slow' }, { value: 'medium', label: 'Medium' }, { value: 'fast', label: 'Fast' }], ui.speed, (v) => ((ui.speed = v), drawSpeed()), { label: 'Play-along speed', id: 'sc-speed', wide: true }));
+    drawSpeed();
     body.append(
       viewSeg,
       h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
       field('position', seg(Array.from({ length: nPos }, (_, i) => ({ value: i, label: String(i + 1) })), ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
-      field('tempo', h('div.row.nowrap', slider, bpmLabel)),
       trainer,
+      field('play-along speed', speedSeg),
     );
     return;
   }
