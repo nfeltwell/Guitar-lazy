@@ -46,7 +46,7 @@ function renderPieces(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Short pieces, each built on one fingerpicking idea: let-it-ring arpeggios, shapes over open-string drones, crosspicking, hammer-ons, bass with a melody on top. The jangly, ringing sound of British indie guitar is mostly these tricks.')),
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Short pieces for that ringing, jangly indie sound. Press play and follow the lit string.')),
       h('div.field', h('span.field-label', 'tempo'), h('div.row.nowrap', h('input', { type: 'range', min: 40, max: 120, step: 2, value: pieceBpm, id: 'piece-bpm', 'aria-label': 'Tempo', oninput: (e) => ((pieceBpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)), onchange: () => views.forEach((v) => v.restart()) }), bpmLabel)),
       list,
     ),
@@ -263,7 +263,7 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Build a loop, choose a pattern, and follow the lit string. The letter under it is the finger: p thumb, i index, m middle, a ring.')),
+      h('div.stack', h('h1', 'Pick lab'), modeSeg(root, ctx), h('p.muted', 'Tap chords to make a loop, pick a pattern, press play.')),
       h('section.stack', h('div.label', 'key'), keyHolder, palette),
       h('section.sect', h('div.sect-head', h('h2', 'Your loop'), presetSel), progRow, suggest, capo),
       h('section.sect', h('div.fields', field('pattern', patternSel), field('tempo', h('div.row.nowrap', bpmInput, bpmLabel))), feel, h('div.row', sparkleB, melodyB)),

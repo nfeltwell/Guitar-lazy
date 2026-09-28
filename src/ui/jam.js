@@ -74,7 +74,7 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Jam'), h('p.muted', 'A backing band to noodle over. The neck shows every note that fits; the current chord’s notes light up in colour as it changes. Land on a coloured note when the chord changes.')),
+      h('div.stack', h('h1', 'Jam'), h('p.muted', 'A band to noodle over. Coloured notes are the chord playing now; land on one when it changes.')),
       h(
         'div.fields',
         field('loop', select([...Object.entries(PROGRESSIONS).map(([id, p]) => ({ value: id, label: p.name + ' (' + p.rn.join(' ').replace(/b/g, '♭') + ')' })), ...ideas], jam.source, (v) => ((jam.source = v), redo()), { id: 'jam-src' })),

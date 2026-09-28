@@ -62,7 +62,7 @@ export function render(root, ctx) {
   root.append(
     h(
       'div.stack-lg',
-      h('div.stack', h('h1', 'Moves'), h('p.muted', 'Pick two chords. These are the ways to get from one to the other so it sounds like a song, not a chord chart: bass walks, slash chords, passing chords, fills.')),
+      h('div.stack', h('h1', 'Moves'), h('p.muted', 'Pick two chords. Here’s how to get between them so it sounds like a song.')),
       h('section.stack', h('div.label', 'key'), seg(KEYS, ui.key, (k) => ((ui.key = k), redo()), { id: 'mv-key', label: 'Key', wide: true }), h('div.label', 'from'), chipRow('from'), h('div.label', 'to'), chipRow('to')),
       h('section.stack', h('div.label', 'worth knowing in ' + ui.key), pairChips(suggestedPairs(ui.key)), loopPairs.length ? [h('div.label', 'from your Pick lab loop'), pairChips(loopPairs, ctx.state.settings.pickLab?.key)] : null),
       field('tempo', h('div.row.nowrap', h('input', { type: 'range', min: 50, max: 130, step: 2, value: ui.bpm, id: 'mv-bpm', 'aria-label': 'Tempo', oninput: (e) => ((ui.bpm = Number(e.target.value)), (bpmLabel.textContent = e.target.value)) }), bpmLabel)),

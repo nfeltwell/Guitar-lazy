@@ -31,7 +31,7 @@ export function render(root, ctx) {
   };
   drawMode();
   draw();
-  root.append(h('div.stack-lg', h('div.stack', h('h1', 'The neck'), h('p.muted', 'Held like you hold the guitar: nut on the left, high e on top (same as tab). Swipe sideways to go up the neck.')), modeHolder, body));
+  root.append(h('div.stack-lg', h('div.stack', h('h1', 'The neck'), h('p.muted', 'Swipe along the neck. High e on top, like tab.')), modeHolder, body));
 }
 
 // Triads built on the scale's degrees (pentatonics borrow from their parent scale).
@@ -93,12 +93,12 @@ function scales(body) {
   body.append(
     viewSeg,
     h('div.fields', field('key', select(ROOTS, ui.key, (v) => ((ui.key = v), rerender(body, scales)), { id: 'sc-key' })), field('scale', select(Object.entries(SCALES).map(([id, s]) => ({ value: id, label: s.name })), ui.scale, (v) => ((ui.scale = v), rerender(body, scales)), { id: 'sc-scale' }))),
+    h('div.nk-wrap', board),
+    legend(ui.scale === 'blues' && !ov ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
     field('position', seg(posOpts, ui.pos, (v) => ((ui.pos = v), rerender(body, scales)), { label: 'Position', id: 'sc-pos', wide: true })),
     chordsHere.length ? field('show a chord inside the scale', seg([{ value: 'none', label: 'Scale' }, ...chordsHere.map((c) => ({ value: c.id, label: c.id }))], ui.overlay, (v) => ((ui.overlay = v), rerender(body, scales)), { label: 'Chord overlay', id: 'sc-ov', wide: true })) : null,
     h('div.row.between', h('span.label', `${ui.key} ${sc.name.toLowerCase()} · ${span}${ov ? ` · ${prettyChord(ov.sym)} lit` : ''}`), seg([{ value: 'degree', label: '1 2 3' }, { value: 'note', label: 'C D E' }], ui.labels, (v) => ((ui.labels = v), rerender(body, scales)), { label: 'Labels' })),
-    legend(ui.scale === 'blues' && !ov ? ['root', 'third', 'fifth', 'scale', 'blue'] : ['root', 'third', 'fifth', 'scale']),
-    h('div.nk-wrap', board),
-    box ? h('div.row', btn('Practise this position', () => ((ui.view = 'practise'), rerender(body, scales)), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap any dot to hear it. Pick a position to see one hand shape at a time; the others fade. Then press Practise it.'),
+    box ? h('div.row', btn('Practise this position', () => ((ui.view = 'practise'), rerender(body, scales)), { cls: 'primary', ico: 'play', id: 'sc-play' })) : h('p.small.muted', 'Tap a dot to hear it. Pick a position to focus on one hand shape.'),
     h(
       'p.small.muted',
       ui.scale === 'minPent'

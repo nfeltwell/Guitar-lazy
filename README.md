@@ -23,7 +23,7 @@ It is tuned for an intermediate player who skipped scales. You know your open ch
 - **Weak spots first.** New material comes from the track furthest behind. Theory arrives as 16 short cheat codes, each shown just before the item it unlocks.
 - **Forgiving scheduler.** A miss keeps 30% of the old gap rather than starting over. A clean rep after a long gap earns a bigger jump. A pile of reviews holds back new material. The shakiest items come first. The number of unfinished items allowed at once scales with how much you actually practise.
 - **Milestones:** Travis on autopilot → Pretty chords → Smooth changes → Know the neck → **Noodle & write** (your goal) → Solo over a jam.
-- **Design.** A songwriter's notebook: paper with grain, a pencil-drawn neck (the wobble is generated but stable), coloured-pencil note dots, handwritten headings (Kalam), typed tab (Courier Prime), a highlighter for what's playing and a red pen for the current note. Dark mode is chalk on slate. The note colours mean the same thing everywhere: red root, yellow 3rd, blue 5th, green 7ths/6ths/9ths.
+- **Design.** Calm and legible: Hanken Grotesk for all type, solid ink buttons, underline tabs, warm paper background. The analogue touch sits where it matters: a pencil-drawn neck, coloured-pencil note dots, handwritten margin notes and finger letters, a highlighter and a red pen for what is playing. Dark mode is chalk on slate. Note colours mean the same thing everywhere: red root, yellow 3rd, blue 5th, green 7ths/6ths/9ths.
 
 ### Honest about limits
 
